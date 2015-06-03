@@ -1,0 +1,4 @@
+exportPattern("^[[:alpha:]]+")
+importFrom(mclust, adjustedRandIndex)
+importFrom(clusterCrit, extCriteria)
+importFrom(clusterCrit, intCriteria)
