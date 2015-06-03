@@ -62,6 +62,5 @@ check_gene_filter1 <- function(d, d.name, min.cells, max.cells, min.reads, n.dim
     w <- transformation(dists, "spectral")
     
     res <- check_kmeans_clustering(w[[1]], n.dim, n.clusters, labs.known)
-    cat(res$ari)
-    cat("\n")
+    return(res$ari)
 }
