@@ -105,17 +105,3 @@ nearest_neighbor <- function(cors, k) {
     }
     return(cors)
 }
-
-check_kmeans_clustering <- function(w, n.dim, n.clusters, labs.known) {
-    ids <- kmeans(w[, 1:n.dim], n.clusters, iter.max = 1e+09, nstart = 1000)
-    
-    ari <- adjustedRandIndex(ids$cluster, labs.known)
-    rand <- extCriteria(ids$cluster, as.integer(labs.known), "rand")[[1]]
-    jaccard <- extCriteria(ids$cluster, as.integer(labs.known), "jaccard")[[1]]
-    dunn <- intCriteria(w, ids$cluster, "dunn")[[1]]
-    davies_bouldin <- intCriteria(w, ids$cluster, "davies_bouldin")[[1]]
-    silhouette <- intCriteria(w, ids$cluster, "silhouette")[[1]]
-    
-    return(list(ari = ari, rand = rand, jaccard = jaccard, dunn = dunn, davies_bouldin = davies_bouldin, silhouette = silhouette, 
-        labs = ids$cluster, labs.known = as.numeric(labs.known)))
-} 

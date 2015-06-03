@@ -2,8 +2,7 @@
 % Please edit documentation in R/clustools.R
 \name{gene_filter2}
 \alias{gene_filter2}
-\title{Filter genes that would not contribute to clustering, because statistically they
-have a very low contribution}
+\title{Second filtering step}
 \usage{
 gene_filter2(d, method)
 }
