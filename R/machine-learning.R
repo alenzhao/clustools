@@ -51,16 +51,21 @@ check_gene_filter1 <- function(d, d.name, min.cells, max.cells, min.reads, n.dim
     labs.known <- as.numeric(colnames(d))
     n.clusters <- length(unique(labs.known))
     
+    cat("Performing filtering1...\n")
     d <- gene_filter1(d, min.cells, max.cells, min.reads)
     
+    cat("Log-trasforming data...\n")
     if (d.name != "bernstein") {
         d <- log2(1 + d)
     }
     
+    cat("Performing filtering2...\n")
     d <- gene_filter2(d, "none")
+    cat("Computing distance matrix...\n")
     dists <- calculate_distance(d, "spearman")
+    cat("Performing data transformation...\n")
     w <- transformation(dists, "spectral")
-    
+    cat("Performing kmeans clustering...\n")
     res <- check_kmeans_clustering(w[[1]], n.dim, n.clusters, labs.known)
     return(res$ari)
 }
