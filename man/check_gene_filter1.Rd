@@ -2,31 +2,33 @@
 % Please edit documentation in R/machine-learning.R
 \name{check_gene_filter1}
 \alias{check_gene_filter1}
-\title{Check the first filtering step}
+\title{Check the first filtering step.}
 \usage{
-check_gene_filter1(d, d.name, min.cells, max.cells, min.reads, n.dim)
+check_gene_filter1(d, min.cells, max.cells, min.reads, n.dim)
 }
 \arguments{
-\item{d}{Expression matrix with rows as genes and columns as cells}
+\item{d}{Expression matrix with rows as genes and columns as cells. Column
+names of d should represent the ground truth clustering indecies.}
 
-\item{d.name}{Name of the toy dataset. Either "quake", "sandberg", "linnarsson" or "bernstein"}
+\item{min.cells}{Minimum number of cells in which a given gene is expressed.}
 
-\item{min.cells}{Minimum number of cells in which a given gene is expressed}
+\item{max.cells}{Maximum number of cells in which a given gene is expressed.}
 
-\item{max.cells}{Maximum number of cells in which a given gene is expressed}
-
-\item{min.reads}{Minimum number of reads per gene per cell}
+\item{min.reads}{Minimum number of reads per gene per cell.}
 
 \item{n.dim}{Number of dimension of the transformed distance matrix which is used
-in kmeans clustering}
+in kmeans clustering.}
 }
 \value{
-Adjusted Rand index of the clustering
+Adjusted Rand index of the clustering.
 }
 \description{
-Evaluate Adjusted Rand index based on gene_filter1() parameters
+Evaluate Adjusted Rand index based on gene_filter1() parameters. NOTE that
+gene_filter2 is set to "none", distance is set to "spearman" and transformation
+is set to "spectral". These parameters were chosen because they provide the
+best clustering index.
 }
 \examples{
-check_gene_filter1(quake, "quake", 3, 3, 2, 4)
+check_gene_filter1(quake, 3, 3, 2, 4)
 }
 

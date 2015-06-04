@@ -33,32 +33,30 @@ check_kmeans_clustering <- function(w, n.dim, n.clusters, labs.known) {
                 labs = ids$cluster, labs.known = as.numeric(labs.known)))
 } 
 
-#' Check the first filtering step
+#' Check the first filtering step.
 #' 
-#' Evaluate Adjusted Rand index based on gene_filter1() parameters
+#' Evaluate Adjusted Rand index based on gene_filter1() parameters. NOTE that 
+#' gene_filter2 is set to "none", distance is set to "spearman" and transformation 
+#' is set to "spectral". These parameters were chosen because they provide the 
+#' best clustering index.
 #' 
-#' @param d Expression matrix with rows as genes and columns as cells
-#' @param d.name Name of the toy dataset. Either "quake", "sandberg", "linnarsson" or "bernstein"
-#' @param min.cells Minimum number of cells in which a given gene is expressed
-#' @param max.cells Maximum number of cells in which a given gene is expressed
-#' @param min.reads Minimum number of reads per gene per cell
+#' @param d Expression matrix with rows as genes and columns as cells. Column 
+#' names of d should represent the ground truth clustering indecies.
+#' @param min.cells Minimum number of cells in which a given gene is expressed.
+#' @param max.cells Maximum number of cells in which a given gene is expressed.
+#' @param min.reads Minimum number of reads per gene per cell.
 #' @param n.dim Number of dimension of the transformed distance matrix which is used
-#' in kmeans clustering
-#' @return Adjusted Rand index of the clustering
+#' in kmeans clustering.
+#' @return Adjusted Rand index of the clustering.
 #' @examples
-#' check_gene_filter1(quake, "quake", 3, 3, 2, 4)
-check_gene_filter1 <- function(d, d.name, min.cells, max.cells, min.reads, n.dim) {
+#' check_gene_filter1(quake, 3, 3, 2, 4)
+check_gene_filter1 <- function(d, min.cells, max.cells, min.reads, n.dim) {
     labs.known <- as.numeric(colnames(d))
     n.clusters <- length(unique(labs.known))
-    
     cat("Performing filtering1...\n")
     d <- gene_filter1(d, min.cells, max.cells, min.reads)
-    
     cat("Log-trasforming data...\n")
-    if (d.name != "bernstein") {
-        d <- log2(1 + d)
-    }
-    
+    d <- log2(1 + d)
     cat("Performing filtering2...\n")
     d <- gene_filter2(d, "none")
     cat("Computing distance matrix...\n")
