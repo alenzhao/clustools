@@ -92,7 +92,7 @@ transformation <- function(dists, method) {
         # here need to sort eigenvectors by their eigenvalues in increasing order!
         list(eigen(L)$vectors[, order(eigen(L)$values)], eigen(L)$values[order(eigen(L)$values)])
     } else if (method == "mds") {
-        t <- cmdscale(dists, k = 2)
+        t <- cmdscale(dists, k = ncol(dists) - 1)
         list(t)
     }
 }
