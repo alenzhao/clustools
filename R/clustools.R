@@ -124,7 +124,18 @@ nearest_neighbor <- function(cors, k) {
 #' "spectral_reg" or "mds")
 #' @param n.dim Number of dimension of the transformed distance matrix which is used
 #' in kmeans clustering.
-#' @return Adjusted Rand index of the clustering.
+#' @return A list of clustering evaluation indexes together with known and
+#' calculated clustering labels of the cells:
+#' \describe{
+#'   \item{ari}{Adjusted Rand Index}
+#'   \item{rand}{Rand Index}
+#'   \item{jaccard}{Jaccard Index}
+#'   \item{dunn}{Dunn Index}
+#'   \item{davies_bouldin}{Davies Bouldin Index}
+#'   \item{silhouette}{Silhouette Index}
+#'   \item{labs}{Clustering labels of the cells}
+#'   \item{labs.known}{Known (from experiment) clustering labels of the cells}
+#' }
 #' @examples
 #' machine_learning_pipeline("quake", "none", "spearman", "spectral", 4)
 machine_learning_pipeline <- function(dataset, sel, distan, clust, n.dim) {
@@ -133,30 +144,24 @@ machine_learning_pipeline <- function(dataset, sel, distan, clust, n.dim) {
     n.clusters <- length(unique(labs.known))
     cat("Performing filtering1...\n")
     if (dataset == "quake") {
-        # 50 cells, 5 clusters
         min.cells <- 3
         max.cells <- 3
         min.reads <- 2
     } else if (dataset == "sandberg") {
-        # 201 cells, 9 clusters
         min.cells <- 12
         max.cells <- 12
         min.reads <- 2
     } else if (dataset == "linnarsson") {
-        # 3005 cells, 9 clusters
         min.cells <- 180
         max.cells <- 180
         min.reads <- 2
     } else if (dataset == "bernstein") {
-        # 364 cells, 5 clusters
-        # bernstein data is already processed
         min.cells <- 0
         max.cells <- 0
         min.reads <- 0
     }
     d <- gene_filter1(d, min.cells, max.cells, min.reads)
     cat("Log-trasforming data...\n")
-    # bernstein data is already processed
     if (dataset != "bernstein") {
         d <- log2(1 + d)
     }

@@ -23,7 +23,18 @@ in kmeans clustering.}
 "linnarsson"}
 }
 \value{
-Adjusted Rand index of the clustering.
+A list of clustering evaluation indexes together with known and
+calculated clustering labels of the cells:
+\describe{
+  \item{ari}{Adjusted Rand Index}
+  \item{rand}{Rand Index}
+  \item{jaccard}{Jaccard Index}
+  \item{dunn}{Dunn Index}
+  \item{davies_bouldin}{Davies Bouldin Index}
+  \item{silhouette}{Silhouette Index}
+  \item{labs}{Clustering labels of the cells}
+  \item{labs.known}{Known (from experiment) clustering labels of the cells}
+}
 }
 \description{
 Performs and evaluates kmeans clustering with a give combination of gene
