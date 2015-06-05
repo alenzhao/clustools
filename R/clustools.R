@@ -124,9 +124,8 @@ nearest_neighbor <- function(cors, k) {
 #' "spectral_reg" or "mds")
 #' @param n.dim Number of dimension of the transformed distance matrix which is used
 #' in kmeans clustering.
-#' @return Three or four files (depending on the transformation method) containing
-#' eigen vectors (*-vecs.txt), eigen values (*-vals.txt) of the transformed matrix
-#' and a set of clustering evaluation indecies (*-inds.txt) together with known and
+#' @return Two small files (depending on the transformation method) containing
+#' a set of clustering evaluation indecies (*-inds.txt) together with known and
 #' calculated clustering labels of the cells (*-labs.txt). Evaluation indecies are
 #' the following:
 #' \describe{
@@ -173,15 +172,6 @@ machine_learning_pipeline <- function(dataset, sel, distan, clust, n.dim) {
     dists <- calculate_distance(d, distan)
     cat("Performing data transformation...\n")
     w <- transformation(dists, clust)
-    if (length(w) == 2) {
-        write.table(w[[1]], file = paste0(clust, "-vecs.txt"), quote = F,
-                    sep = ",", row.names = F, col.names = F)
-        write.table(w[[2]], file = paste0(clust, "-vals.txt"), quote = F,
-                    sep = ",", row.names = F, col.names = F)
-    } else {
-        write.table(w[[1]], file = paste0(clust, "-vecs.txt"), quote = F,
-                    sep = ",", row.names = F, col.names = F)
-    }
     cat("Performing kmeans clustering...\n")
     res <- check_kmeans_clustering(w[[1]], n.dim, n.clusters, labs.known)
     sink(paste0(clust, "-inds.txt"))

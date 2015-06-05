@@ -23,9 +23,8 @@ in kmeans clustering.}
 "linnarsson"}
 }
 \value{
-Three or four files (depending on the transformation method) containing
-eigen vectors (*-vecs.txt), eigen values (*-vals.txt) of the transformed matrix
-and a set of clustering evaluation indecies (*-inds.txt) together with known and
+Two small files (depending on the transformation method) containing
+a set of clustering evaluation indecies (*-inds.txt) together with known and
 calculated clustering labels of the cells (*-labs.txt). Evaluation indecies are
 the following:
 \describe{
