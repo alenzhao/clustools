@@ -23,8 +23,11 @@ in kmeans clustering.}
 "linnarsson"}
 }
 \value{
-A list of clustering evaluation indexes together with known and
-calculated clustering labels of the cells:
+Three or four files (depending on the transformation method) containing
+eigen vectors (*-vecs.txt), eigen values (*-vals.txt) of the transformed matrix
+and a set of clustering evaluation indecies (*-inds.txt) together with known and
+calculated clustering labels of the cells (*-labs.txt). Evaluation indecies are
+the following:
 \describe{
   \item{ari}{Adjusted Rand Index}
   \item{rand}{Rand Index}
@@ -32,13 +35,7 @@ calculated clustering labels of the cells:
   \item{dunn}{Dunn Index}
   \item{davies_bouldin}{Davies Bouldin Index}
   \item{silhouette}{Silhouette Index}
-  \item{labs}{Clustering labels of the cells}
-  \item{labs.known}{Known (from experiment) clustering labels of the cells}
 }
-
-NOTE: this function will also create one or two files (depending on the
-transformation method) containing eigen vectors and eigen values of the
-transformed matrix
 }
 \description{
 Performs and evaluates kmeans clustering with a give combination of gene

@@ -124,8 +124,11 @@ nearest_neighbor <- function(cors, k) {
 #' "spectral_reg" or "mds")
 #' @param n.dim Number of dimension of the transformed distance matrix which is used
 #' in kmeans clustering.
-#' @return A list of clustering evaluation indexes together with known and
-#' calculated clustering labels of the cells:
+#' @return Three or four files (depending on the transformation method) containing
+#' eigen vectors (*-vecs.txt), eigen values (*-vals.txt) of the transformed matrix
+#' and a set of clustering evaluation indecies (*-inds.txt) together with known and
+#' calculated clustering labels of the cells (*-labs.txt). Evaluation indecies are
+#' the following:
 #' \describe{
 #'   \item{ari}{Adjusted Rand Index}
 #'   \item{rand}{Rand Index}
@@ -133,13 +136,8 @@ nearest_neighbor <- function(cors, k) {
 #'   \item{dunn}{Dunn Index}
 #'   \item{davies_bouldin}{Davies Bouldin Index}
 #'   \item{silhouette}{Silhouette Index}
-#'   \item{labs}{Clustering labels of the cells}
-#'   \item{labs.known}{Known (from experiment) clustering labels of the cells}
 #' }
 #' 
-#' NOTE: this function will also create one or two files (depending on the
-#' transformation method) containing eigen vectors and eigen values of the 
-#' transformed matrix
 #' @examples
 #' machine_learning_pipeline("quake", "none", "spearman", "spectral", 4)
 machine_learning_pipeline <- function(dataset, sel, distan, clust, n.dim) {
@@ -176,15 +174,24 @@ machine_learning_pipeline <- function(dataset, sel, distan, clust, n.dim) {
     cat("Performing data transformation...\n")
     w <- transformation(dists, clust)
     if (length(w) == 2) {
-        write.table(w[[1]], file = paste0(clust, "-vectors.txt"), quote = F,
+        write.table(w[[1]], file = paste0(clust, "-vecs.txt"), quote = F,
                     sep = ",", row.names = F, col.names = F)
-        write.table(w[[2]], file = paste0(clust, "-values.txt"), quote = F,
+        write.table(w[[2]], file = paste0(clust, "-vals.txt"), quote = F,
                     sep = ",", row.names = F, col.names = F)
     } else {
-        write.table(w[[1]], file = paste0(clust, "-vectors.txt"), quote = F,
+        write.table(w[[1]], file = paste0(clust, "-vecs.txt"), quote = F,
                     sep = ",", row.names = F, col.names = F)
     }
     cat("Performing kmeans clustering...\n")
     res <- check_kmeans_clustering(w[[1]], n.dim, n.clusters, labs.known)
-    return(res)
+    sink(paste0(clust, "-inds.txt"))
+    cat(c(unlist(res)[1:6], dataset, sel, distan, clust, n.dim))
+    cat("\n")
+    sink()
+    sink(paste0(clust, "-labs.txt"))
+    cat(res$labs)
+    cat("\n")
+    cat(res$labs.known)
+    cat("\n")
+    sink()
 }
