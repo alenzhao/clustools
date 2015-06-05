@@ -136,6 +136,10 @@ nearest_neighbor <- function(cors, k) {
 #'   \item{labs}{Clustering labels of the cells}
 #'   \item{labs.known}{Known (from experiment) clustering labels of the cells}
 #' }
+#' 
+#' NOTE: this function will also create one or two files (depending on the
+#' transformation method) containing eigen vectors and eigen values of the 
+#' transformed matrix
 #' @examples
 #' machine_learning_pipeline("quake", "none", "spearman", "spectral", 4)
 machine_learning_pipeline <- function(dataset, sel, distan, clust, n.dim) {

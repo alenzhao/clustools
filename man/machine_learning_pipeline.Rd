@@ -35,6 +35,10 @@ calculated clustering labels of the cells:
   \item{labs}{Clustering labels of the cells}
   \item{labs.known}{Known (from experiment) clustering labels of the cells}
 }
+
+NOTE: this function will also create one or two files (depending on the
+transformation method) containing eigen vectors and eigen values of the
+transformed matrix
 }
 \description{
 Performs and evaluates kmeans clustering with a give combination of gene
