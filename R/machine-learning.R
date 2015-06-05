@@ -16,6 +16,7 @@
 #'   \item{davies_bouldin}{Davies Bouldin Index}
 #'   \item{silhouette}{Silhouette Index}
 #'   \item{labs}{Clustering labels of the cells}
+#'   \item{labs.known}{Known (from experiment) clustering labels of the cells}
 #' }
 #' @examples
 #' check_kmeans_clustering(w, 4, 5, labs.known)
