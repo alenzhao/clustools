@@ -27,6 +27,8 @@ markov_stability <- function(dataset, sel, distan, nn, matlab) {
     if(nn != nrow(graph)) {
         graph.nn <- nearest_neighbor(graph, nn)
         graph.nn <- (graph.nn + t(graph.nn))/2
+    } else {
+        graph.nn <- graph
     }
     write.table(graph.nn, file = paste0(dataset, "-", nn, "-graph.csv"),
                 sep = ",", row.names = F, col.names = F)
