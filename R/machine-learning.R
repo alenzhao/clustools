@@ -68,3 +68,143 @@ check_gene_filter1 <- function(d, min.cells, max.cells, min.reads, n.dim) {
     res <- check_kmeans_clustering(w[[1]], n.dim, n.clusters, labs.known)
     return(res$ari)
 }
+
+create_distance_matrix <- function(dataset, d, sel, distan) {
+    cat("Performing filtering1...\n")
+    if (dataset == "quake") {
+        min.cells <- 3
+        max.cells <- 3
+        min.reads <- 2
+    } else if (dataset == "sandberg") {
+        min.cells <- 12
+        max.cells <- 12
+        min.reads <- 2
+    } else if (dataset == "linnarsson") {
+        min.cells <- 180
+        max.cells <- 180
+        min.reads <- 2
+    } else if (dataset == "bernstein") {
+        min.cells <- 0
+        max.cells <- 0
+        min.reads <- 0
+    }
+    d <- gene_filter1(d, min.cells, max.cells, min.reads)
+    cat("Log-trasforming data...\n")
+    if (dataset != "bernstein") {
+        d <- log2(1 + d)
+    }
+    cat("Performing filtering2...\n")
+    d <- gene_filter2(d, sel)
+    cat("Computing distance matrix...\n")
+    dists <- calculate_distance(d, distan)
+    return(dists)
+}
+
+#' Learning pipeline
+#' 
+#' Performs and evaluates kmeans clustering with a given combination of gene
+#' filtering 2, distance metrics, transformation and number of dimensions used
+#' in clustering.
+#' 
+#' @param d Name of the dataset. Either "quake", "sandberg", "bernstein" or
+#' "linnarsson"
+#' @param sel Selection method used by gene_filter2() function (either 
+#' "none", "correlation", "variance", "variance_weight", "shannon_weight")
+#' @param distan Distance metrics for calculating a distance matrix (either 
+#' "pearson", "spearman", "euclidean", "manhattan" or "minkowski").
+#' @param clust Distance matrix transformation method (either "pca", "spectral",
+#' "spectral_reg" or "mds")
+#' @param n.dim Number of dimension of the transformed distance matrix which is used
+#' in kmeans clustering.
+#' @return Two small files (depending on the transformation method) containing
+#' a set of clustering evaluation indecies (*-inds.txt) together with known and
+#' calculated clustering labels of the cells (*-labs.txt). Evaluation indecies are
+#' the following:
+#' \describe{
+#'   \item{ari}{Adjusted Rand Index}
+#'   \item{rand}{Rand Index}
+#'   \item{jaccard}{Jaccard Index}
+#'   \item{dunn}{Dunn Index}
+#'   \item{davies_bouldin}{Davies Bouldin Index}
+#'   \item{silhouette}{Silhouette Index}
+#' }
+#' 
+#' @examples
+#' machine_learning_pipeline("quake", "none", "spearman", "spectral", 4)
+machine_learning_pipeline <- function(dataset, sel, distan, clust, n.dim) {
+    d <- get(dataset)
+    labs.known <- as.numeric(colnames(d))
+    n.clusters <- length(unique(labs.known))
+    dists <- create_distance_matrix(dataset, d, sel, distan)
+    cat("Performing data transformation...\n")
+    w <- transformation(dists, clust)
+    cat("Performing kmeans clustering...\n")
+    res <- check_kmeans_clustering(w[[1]], n.dim, n.clusters, labs.known)
+    sink(paste0(clust, "-inds.txt"))
+    cat(c(unlist(res)[1:6], dataset, sel, distan, clust, n.dim))
+    cat("\n")
+    sink()
+    sink(paste0(clust, "-labs.txt"))
+    cat(res$labs)
+    cat("\n")
+    cat(res$labs.known)
+    cat("\n")
+    sink()
+}
+
+#' Nearest neighbour pipeline
+#' 
+#' Performs and evaluates kmeans clustering with a given combination of gene
+#' filtering 2, distance metrics, transformation, number of dimensions used in
+#' clustering and number of nearest neighbours.
+#' 
+#' @param d Name of the dataset. Either "quake", "sandberg", "bernstein" or
+#' "linnarsson"
+#' @param sel Selection method used by gene_filter2() function (either 
+#' "none", "correlation", "variance", "variance_weight", "shannon_weight")
+#' @param distan Distance metrics for calculating a distance matrix (either 
+#' "pearson", "spearman", "euclidean", "manhattan" or "minkowski").
+#' @param clust Distance matrix transformation method (either "pca", "spectral",
+#' "spectral_reg" or "mds")
+#' @param n.dim Number of dimension of the transformed distance matrix which is used
+#' in kmeans clustering.
+#' @param nn Number of nearest neighbours used
+#' @return Two small files (depending on the transformation method) containing
+#' a set of clustering evaluation indecies (*-inds.txt) together with known and
+#' calculated clustering labels of the cells (*-labs.txt). Evaluation indecies are
+#' the following:
+#' \describe{
+#'   \item{ari}{Adjusted Rand Index}
+#'   \item{rand}{Rand Index}
+#'   \item{jaccard}{Jaccard Index}
+#'   \item{dunn}{Dunn Index}
+#'   \item{davies_bouldin}{Davies Bouldin Index}
+#'   \item{silhouette}{Silhouette Index}
+#' }
+#' 
+#' @examples
+#' nearest_neighbour_pipeline("quake", "none", "spearman", "spectral", 4, 3)
+nearest_neighbour_pipeline <- function(dataset, sel, distan, clust, n.dim, nn) {
+    d <- get(dataset)
+    labs.known <- as.numeric(colnames(d))
+    n.clusters <- length(unique(labs.known))
+    dists <- create_distance_matrix(dataset, d, sel, distan)
+    graph <- exp(-dists/max(dists))
+    cat("Identifying nearest neighbours...\n")
+    graph.nn <- nearest_neighbor(graph, nn)
+    graph.nn <- (graph.nn + t(graph.nn))/2
+    cat("Performing data transformation...\n")
+    w <- transformation(graph.nn, clust)
+    cat("Performing kmeans clustering...\n")
+    res <- check_kmeans_clustering(w[[1]], n.dim, n.clusters, labs.known)
+    sink(paste0(clust, "-inds.txt"))
+    cat(c(unlist(res)[1:6], dataset, sel, distan, clust, n.dim, nn))
+    cat("\n")
+    sink()
+    sink(paste0(clust, "-labs.txt"))
+    cat(res$labs)
+    cat("\n")
+    cat(res$labs.known)
+    cat("\n")
+    sink()
+}
