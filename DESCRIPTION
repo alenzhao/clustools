@@ -11,5 +11,6 @@ Imports:
     mclust,
     clusterCrit,
     reshape2,
-    ggplot2
+    ggplot2,
+    e1071
 LazyData: true

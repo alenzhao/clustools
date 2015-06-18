@@ -208,3 +208,50 @@ nearest_neighbour_pipeline <- function(dataset, sel, distan, clust, n.dim, nn) {
     cat("\n")
     sink()
 }
+
+support_vector_machines <- function(dataset, teach.study.ratio) {
+    cat("Performing filtering1...\n")
+    if (dataset == "quake") {
+        min.cells <- 3
+        max.cells <- 3
+        min.reads <- 2
+    } else if (dataset == "sandberg") {
+        min.cells <- 12
+        max.cells <- 12
+        min.reads <- 2
+    } else if (dataset == "linnarsson") {
+        min.cells <- 180
+        max.cells <- 180
+        min.reads <- 2
+    } else if (dataset == "bernstein") {
+        min.cells <- 0
+        max.cells <- 0
+        min.reads <- 0
+    }
+    d <- get(dataset)
+    dat <- gene_filter1(d, min.cells, max.cells, min.reads)
+    samp <- sample(dim(dat)[2], round(teach.study.ratio*dim(dat)[2]))
+    teach <- dat[ , samp]
+    cat("Dimensions of teacher:\n")
+    cat(dim(teach))
+    cat("\n")
+    study <- dat[ , setdiff(1:dim(dat)[2], samp)]
+    cat("Dimensions of study:\n")
+    cat(dim(study))
+    cat("\n")
+    
+    teach <- t(teach)
+    labs <- factor(rownames(teach))
+    rownames(teach) <- NULL
+    # length(unique(colnames(teach)))
+    cat("Performing svm...\n")
+    model <- svm(teach, labs, kernel = "linear")
+    cat("Performing prediction...\n")
+    pred <- predict(model, t(study))
+    cat(paste0("ARI: ",
+               adjustedRandIndex(as.numeric(names(pred)), as.numeric(pred)), "\n"))
+    return(list(pred = pred,
+                ari = adjustedRandIndex(as.numeric(names(pred)), as.numeric(pred)),
+                model = model,
+                training = teach))
+}
