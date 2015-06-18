@@ -7,6 +7,9 @@
 machine_learning_pipeline(dataset, sel, distan, clust, n.dim)
 }
 \arguments{
+\item{dataset}{Name of the dataset. Either "quake", "sandberg", "bernstein" or
+"linnarsson"}
+
 \item{sel}{Selection method used by gene_filter2() function (either
 "none", "correlation", "variance", "variance_weight", "shannon_weight")}
 
@@ -18,9 +21,6 @@ machine_learning_pipeline(dataset, sel, distan, clust, n.dim)
 
 \item{n.dim}{Number of dimension of the transformed distance matrix which is used
 in kmeans clustering.}
-
-\item{d}{Name of the dataset. Either "quake", "sandberg", "bernstein" or
-"linnarsson"}
 }
 \value{
 Two small files (depending on the transformation method) containing

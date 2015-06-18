@@ -7,6 +7,9 @@
 nearest_neighbour_pipeline(dataset, sel, distan, clust, n.dim, nn)
 }
 \arguments{
+\item{dataset}{Name of the dataset. Either "quake", "sandberg", "bernstein" or
+"linnarsson"}
+
 \item{sel}{Selection method used by gene_filter2() function (either
 "none", "correlation", "variance", "variance_weight", "shannon_weight")}
 
@@ -20,9 +23,6 @@ nearest_neighbour_pipeline(dataset, sel, distan, clust, n.dim, nn)
 in kmeans clustering.}
 
 \item{nn}{Number of nearest neighbours used}
-
-\item{d}{Name of the dataset. Either "quake", "sandberg", "bernstein" or
-"linnarsson"}
 }
 \value{
 Two small files (depending on the transformation method) containing

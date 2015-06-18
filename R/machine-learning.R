@@ -19,6 +19,8 @@
 #'   \item{labs.known}{Known (from experiment) clustering labels of the cells}
 #' }
 #' @examples
+#' labs.known <- as.numeric(colnames(quake))
+#' w <- transformation(as.matrix(1 - cor(quake, method = "spearman")), "spectral")
 #' check_kmeans_clustering(w, 4, 5, labs.known)
 check_kmeans_clustering <- function(w, n.dim, n.clusters, labs.known) {
     ids <- kmeans(w[, 1:n.dim], n.clusters, iter.max = 1e+09, nstart = 1000)
@@ -69,7 +71,18 @@ check_gene_filter1 <- function(d, min.cells, max.cells, min.reads, n.dim) {
     return(res$ari)
 }
 
-create_distance_matrix <- function(dataset, d, sel, distan) {
+#' Default parameters for the first filtering step
+#' 
+#' Returns default min.cells, max.cells, min.reads parameters used in
+#' gene_filter1()
+#' 
+#' @param dataset Name of the toy dataset (either "quake", "sandberg",
+#' "linnarsson" or "bernstein")
+#' @return min.cells, max.cells, min.reads required to be able to filter genes
+#' using filter1.
+#' @examples
+#' filter1_params("quake")
+filter1_params <- function(dataset) {
     cat("Performing filtering1...\n")
     if (dataset == "quake") {
         min.cells <- 3
@@ -88,6 +101,15 @@ create_distance_matrix <- function(dataset, d, sel, distan) {
         max.cells <- 0
         min.reads <- 0
     }
+    return(list(min.cells = min.cells, max.cells = max.cells, min.reads = min.reads))
+}
+
+create_distance_matrix <- function(dataset, d, sel, distan) {
+    filter1.params <- filter1_params(dataset)
+    min.cells <- filter1.params$min.cells
+    max.cells <- filter1.params$max.cells
+    min.reads <- filter1.params$min.reads
+    
     d <- gene_filter1(d, min.cells, max.cells, min.reads)
     cat("Log-trasforming data...\n")
     if (dataset != "bernstein") {
@@ -106,7 +128,7 @@ create_distance_matrix <- function(dataset, d, sel, distan) {
 #' filtering 2, distance metrics, transformation and number of dimensions used
 #' in clustering.
 #' 
-#' @param d Name of the dataset. Either "quake", "sandberg", "bernstein" or
+#' @param dataset Name of the dataset. Either "quake", "sandberg", "bernstein" or
 #' "linnarsson"
 #' @param sel Selection method used by gene_filter2() function (either 
 #' "none", "correlation", "variance", "variance_weight", "shannon_weight")
@@ -158,7 +180,7 @@ machine_learning_pipeline <- function(dataset, sel, distan, clust, n.dim) {
 #' filtering 2, distance metrics, transformation, number of dimensions used in
 #' clustering and number of nearest neighbours.
 #' 
-#' @param d Name of the dataset. Either "quake", "sandberg", "bernstein" or
+#' @param dataset Name of the dataset. Either "quake", "sandberg", "bernstein" or
 #' "linnarsson"
 #' @param sel Selection method used by gene_filter2() function (either 
 #' "none", "correlation", "variance", "variance_weight", "shannon_weight")
@@ -209,28 +231,31 @@ nearest_neighbour_pipeline <- function(dataset, sel, distan, clust, n.dim, nn) {
     sink()
 }
 
-support_vector_machines <- function(dataset, teach.study.ratio) {
-    cat("Performing filtering1...\n")
-    if (dataset == "quake") {
-        min.cells <- 3
-        max.cells <- 3
-        min.reads <- 2
-    } else if (dataset == "sandberg") {
-        min.cells <- 12
-        max.cells <- 12
-        min.reads <- 2
-    } else if (dataset == "linnarsson") {
-        min.cells <- 180
-        max.cells <- 180
-        min.reads <- 2
-    } else if (dataset == "bernstein") {
-        min.cells <- 0
-        max.cells <- 0
-        min.reads <- 0
-    }
+#' Support vector machine (SVM) learning on toy datasets
+#' 
+#' Perform SVM learning on either quake, sandberg or linnarsson data sets.
+#' 
+#' @param dataset Name of the toy dataset
+#' @param teach.proportion Proportion of cells used for teaching, the rest of the
+#' cells are used for studying
+#' @return 
+#' #' \describe{
+#'   \item{pred}{Predicted cell labels for cells used in study}
+#'   \item{ari}{Adjusted Rand Index - comparison of pred wiht gold standard}
+#'   \item{model}{model parameters used in SVM}
+#'   \item{training}{Training dataset}
+#' }
+#' @examples
+#' res <- support_vector_machines("sandberg", 0.7)
+support_vector_machines <- function(dataset, teach.proportion) {
+    filter1.params <- filter1_params(dataset)
+    min.cells <- filter1.params$min.cells
+    max.cells <- filter1.params$max.cells
+    min.reads <- filter1.params$min.reads
+    
     d <- get(dataset)
     dat <- gene_filter1(d, min.cells, max.cells, min.reads)
-    samp <- sample(dim(dat)[2], round(teach.study.ratio*dim(dat)[2]))
+    samp <- sample(dim(dat)[2], round(teach.proportion*dim(dat)[2]))
     teach <- dat[ , samp]
     cat("Dimensions of teacher:\n")
     cat(dim(teach))

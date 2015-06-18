@@ -33,6 +33,8 @@ Perform kmeans clustering and then calculates several external and internal
 clustering indecies. Parameters of kmeans clustering: iter.max = 1e+09; nstart = 1000.
 }
 \examples{
+labs.known <- as.numeric(colnames(quake))
+w <- transformation(dist(quake), "spectral")
 check_kmeans_clustering(w, 4, 5, labs.known)
 }
 

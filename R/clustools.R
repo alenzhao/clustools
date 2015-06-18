@@ -8,7 +8,8 @@
 #' @param max.cells Maximum number of cells in which a given gene is expressed
 #' @param min.reads Minimum number of reads per gene per cell
 #' @return Filtered expression matrix in which only genes that are expressed in
-#' more than \code{min.cells} and in less than [total number of cells - \code{max.cells}].
+#' more than \code{min.cells} with more than \code{min.reads} reads and also are
+#' expressed in less than [total number of cells - \code{max.cells}].
 #' @examples
 #' gene_filter1(quake, 3, 3, 2)
 gene_filter1 <- function(d, min.cells, max.cells, min.reads) {

@@ -17,7 +17,8 @@ gene_filter1(d, min.cells, max.cells, min.reads)
 }
 \value{
 Filtered expression matrix in which only genes that are expressed in
-more than \code{min.cells} and in less than [total number of cells - \code{max.cells}].
+more than \code{min.cells} with more than \code{min.reads} reads and also are
+expressed in less than [total number of cells - \code{max.cells}].
 }
 \description{
 Filter genes that would not contribute to clustering, because they are either
