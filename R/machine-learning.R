@@ -325,5 +325,5 @@ confusion_pipeline <- function(dataset, n.dim) {
         labs(x = "Cluster index", y = "Confusion measure") +
         theme_bw()
     
-    ggsave(paste0(dataset, "-", n.dim, ".pdf"), w = 15, h = 10)
+    ggsave(paste0(strsplit(dataset, "\\/")[[1]][3], "-", n.dim, ".pdf"), w = 15, h = 10)
 }
