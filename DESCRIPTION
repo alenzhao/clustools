@@ -12,5 +12,6 @@ Imports:
     clusterCrit,
     reshape2,
     ggplot2,
-    e1071
+    e1071,
+    clue
 LazyData: true

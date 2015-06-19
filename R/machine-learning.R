@@ -280,3 +280,50 @@ support_vector_machines <- function(dataset, teach.proportion) {
                 model = model,
                 training = teach))
 }
+
+#' Calclulate and plot confusions
+#' 
+#' Only works on the output of machine_learning_pipeline function from this
+#' package.
+#' 
+#' Calculate and plot confusions.
+#' 
+#' @param dataset Name of the toy dataset.
+#' @param n.dim Number of dimensions used for clustering of the toy dataset
+#' @return Two files with values of confusions and plot of the confussions
+#' facetted by different methods
+#' @examples
+#' confusion_pipeline("quake", 4)
+confusion_pipeline <- function(dataset, n.dim) {
+    sink(paste0(dataset, "-", n.dim, ".txt"))
+    files1 <- list.files(paste0(dataset, "/", n.dim, "/"))
+    for(f1 in files1) {
+        files2 <- list.files(paste0(dataset, "/", n.dim, "/", f1))
+        for(f2 in files2) {
+            for(clust in c("pca", "mds", "spectral", "spectral_reg")) {
+                d <- readLines(paste0(dataset, "/", n.dim, "/", f1, "/", f2, "/",
+                                      clust, "-labs.txt"))
+                labs <- as.numeric(unlist(strsplit(d[1], " ")))
+                labs.known <- as.numeric(unlist(strsplit(d[2], " ")))
+                out <- confusion(labs, labs.known)
+                for(i in 1:length(out)) {
+                    cat(paste(f1, f2, clust, i, out[i], sep = "\t"))
+                    cat("\n")
+                }
+            }
+        }
+    }
+    sink()
+    
+    d <- read.table(paste0(dataset, "-", n.dim, ".txt"), sep = "\t")
+    colnames(d) <- c("filter2", "distan", "transformation", "clust.ind", "confusion")
+    
+    p <- ggplot(d, aes(as.factor(clust.ind), confusion, group = transformation, fill = transformation)) +
+        geom_bar(stat = "identity", position = "dodge") +
+        # geom_bar(position = "dodge", stat = "identity", width = 0.7) +
+        facet_grid(filter2 ~ distan) +
+        labs(x = "Cluster index", y = "Confusion measure") +
+        theme_bw()
+    
+    ggsave(paste0(dataset, "-", n.dim, ".pdf"), w = 15, h = 10)
+}

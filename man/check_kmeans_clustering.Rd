@@ -34,7 +34,7 @@ clustering indecies. Parameters of kmeans clustering: iter.max = 1e+09; nstart =
 }
 \examples{
 labs.known <- as.numeric(colnames(quake))
-w <- transformation(dist(quake), "spectral")
+w <- transformation(as.matrix(1 - cor(quake, method = "spearman")), "spectral")
 check_kmeans_clustering(w, 4, 5, labs.known)
 }
 
