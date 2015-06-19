@@ -295,7 +295,7 @@ support_vector_machines <- function(dataset, teach.proportion) {
 #' @examples
 #' confusion_pipeline("quake", 4)
 confusion_pipeline <- function(dataset, n.dim) {
-    sink(paste0(dataset, "-", n.dim, ".txt"))
+    sink(paste0(strsplit(dataset, "\\/")[[1]][3], "-", n.dim, ".txt"))
     files1 <- list.files(paste0(dataset, "/", n.dim, "/"))
     for(f1 in files1) {
         files2 <- list.files(paste0(dataset, "/", n.dim, "/", f1))
@@ -315,15 +315,18 @@ confusion_pipeline <- function(dataset, n.dim) {
     }
     sink()
     
-    d <- read.table(paste0(dataset, "-", n.dim, ".txt"), sep = "\t")
+    d <- read.table(paste0(strsplit(dataset, "\\/")[[1]][3], "-", n.dim, ".txt"),
+                    sep = "\t")
     colnames(d) <- c("filter2", "distan", "transformation", "clust.ind", "confusion")
     
-    p <- ggplot(d, aes(as.factor(clust.ind), confusion, group = transformation, fill = transformation)) +
+    p <- ggplot(d, aes(as.factor(clust.ind), confusion, group = transformation,
+                       fill = transformation)) +
         geom_bar(stat = "identity", position = "dodge") +
         # geom_bar(position = "dodge", stat = "identity", width = 0.7) +
         facet_grid(filter2 ~ distan) +
         labs(x = "Cluster index", y = "Confusion measure") +
         theme_bw()
     
-    ggsave(paste0(strsplit(dataset, "\\/")[[1]][3], "-", n.dim, ".pdf"), w = 15, h = 10)
+    ggsave(paste0(strsplit(dataset, "\\/")[[1]][3], "-", n.dim, ".pdf"), w = 15,
+           h = 10)
 }
