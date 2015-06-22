@@ -100,6 +100,14 @@ filter1_params <- function(dataset) {
         min.cells <- 0
         max.cells <- 0
         min.reads <- 0
+    } else if (dataset == "zhong") {
+        min.cells <- 3
+        max.cells <- 3
+        min.reads <- 2
+    } else if (dataset == "kirschner") {
+        min.cells <- 160
+        max.cells <- 160
+        min.reads <- 2
     }
     return(list(min.cells = min.cells, max.cells = max.cells, min.reads = min.reads))
 }
