@@ -13,9 +13,12 @@
 linnarsson
 }
 \description{
-Source:
+Source: Zeisel, A. et al. Brain structure. Cell types in the mouse cortex and
+hippocampus revealed by single-cell RNA-seq. Science 347, 1138–1142 (2015).
 }
 \details{
+\url{http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60361}
+
 Columns represent cells, rows represent genes expression values. Colnames
 respresent indexes of cell clusters (known information based on the
 experimental protocol). There are 3005 cells and 9 clusters in this dataset.

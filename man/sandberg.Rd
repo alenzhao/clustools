@@ -13,9 +13,13 @@
 sandberg
 }
 \description{
-Source:
+Source: Deng, Q., Ramsköld, D., Reinius, B. & Sandberg, R. Single-cell RNA-seq reveals
+dynamic, random monoallelic gene expression in mammalian cells. Science 343,
+193–196 (2014).
 }
 \details{
+\url{http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE45719}
+
 Columns represent cells, rows represent genes expression values. Colnames
 respresent indexes of cell clusters (known information based on the
 experimental protocol). There are 201 cells and 9 clusters in this dataset.

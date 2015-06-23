@@ -13,9 +13,12 @@
 bernstein
 }
 \description{
-Source:
+Source: Patel, A. P. et al. Single-cell RNA-seq highlights intratumoral
+heterogeneity in primary glioblastoma. Science 344, 1396–1401 (2014).
 }
 \details{
+\url{http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE57872}
+
 Columns represent cells, rows represent genes expression values. Colnames
 respresent indexes of cell clusters (known information based on the
 experimental protocol). There are 364 cells and 5 clusters in this dataset.

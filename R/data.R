@@ -9,7 +9,11 @@
 
 #' Single cell RNA-Seq data extracted from a publication by Sandberg.
 #'
-#' Source: 
+#' Source: Deng, Q., Ramsköld, D., Reinius, B. & Sandberg, R. Single-cell RNA-seq reveals
+#' dynamic, random monoallelic gene expression in mammalian cells. Science 343,
+#' 193–196 (2014).
+#' 
+#' \url{http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE45719}
 #'
 #' Columns represent cells, rows represent genes expression values. Colnames
 #' respresent indexes of cell clusters (known information based on the 
@@ -18,7 +22,10 @@
 
 #' Single cell RNA-Seq data extracted from a publication by Bernstein.
 #'
-#' Source: 
+#' Source: Patel, A. P. et al. Single-cell RNA-seq highlights intratumoral
+#' heterogeneity in primary glioblastoma. Science 344, 1396–1401 (2014).
+#' 
+#' \url{http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE57872}
 #'
 #' Columns represent cells, rows represent genes expression values. Colnames
 #' respresent indexes of cell clusters (known information based on the 
@@ -30,7 +37,10 @@
 
 #' Single cell RNA-Seq data extracted from a publication by Linnarsson.
 #'
-#' Source: 
+#' Source: Zeisel, A. et al. Brain structure. Cell types in the mouse cortex and
+#' hippocampus revealed by single-cell RNA-seq. Science 347, 1138–1142 (2015).
+#' 
+#' \url{http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60361}
 #'
 #' Columns represent cells, rows represent genes expression values. Colnames
 #' respresent indexes of cell clusters (known information based on the 

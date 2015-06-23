@@ -112,13 +112,13 @@ filter1_params <- function(dataset) {
     return(list(min.cells = min.cells, max.cells = max.cells, min.reads = min.reads))
 }
 
-create_distance_matrix <- function(dataset, d, sel, distan) {
+create_distance_matrix <- function(dataset, sel, distan) {
     filter1.params <- filter1_params(dataset)
     min.cells <- filter1.params$min.cells
     max.cells <- filter1.params$max.cells
     min.reads <- filter1.params$min.reads
     
-    d <- gene_filter1(d, min.cells, max.cells, min.reads)
+    d <- gene_filter1(get(dataset), min.cells, max.cells, min.reads)
     cat("Log-trasforming data...\n")
     if (dataset != "bernstein") {
         d <- log2(1 + d)
@@ -162,10 +162,9 @@ create_distance_matrix <- function(dataset, d, sel, distan) {
 #' @examples
 #' machine_learning_pipeline("quake", "none", "spearman", "spectral", 4)
 machine_learning_pipeline <- function(dataset, sel, distan, clust, n.dim) {
-    d <- get(dataset)
-    labs.known <- as.numeric(colnames(d))
+    labs.known <- as.numeric(colnames(get(dataset)))
     n.clusters <- length(unique(labs.known))
-    dists <- create_distance_matrix(dataset, d, sel, distan)
+    dists <- create_distance_matrix(dataset, sel, distan)
     cat("Performing data transformation...\n")
     w <- transformation(dists, clust)
     cat("Performing kmeans clustering...\n")
@@ -215,10 +214,9 @@ machine_learning_pipeline <- function(dataset, sel, distan, clust, n.dim) {
 #' @examples
 #' nearest_neighbour_pipeline("quake", "none", "spearman", "spectral", 4, 3)
 nearest_neighbour_pipeline <- function(dataset, sel, distan, clust, n.dim, nn) {
-    d <- get(dataset)
-    labs.known <- as.numeric(colnames(d))
+    labs.known <- as.numeric(colnames(get(dataset)))
     n.clusters <- length(unique(labs.known))
-    dists <- create_distance_matrix(dataset, d, sel, distan)
+    dists <- create_distance_matrix(dataset, sel, distan)
     graph <- exp(-dists/max(dists))
     cat("Identifying nearest neighbours...\n")
     graph.nn <- nearest_neighbor(graph, nn)

@@ -1,3 +1,4 @@
+# Zhong
 # Biase, F. H., Cao, X. & Zhong, S. Cell fate inclination within 2-cell and
 # 4-cell mouse embryos revealed by single-cell RNA sequencing. Genome Res. 24,
 # 1787–1796 (2014).
@@ -7,6 +8,7 @@ zhong <- as.matrix(zhong[ , 2:50])
 colnames(zhong) <- c(rep(1, 9), rep(2, 20), rep(3, 20))
 save(zhong, file = "data/zhong.rda")
 
+# Kirschner
 # Klein, A. M. et al. Droplet Barcoding for Single-Cell Transcriptomics Applied
 # to Embryonic Stem Cells. Cell 161, 1187–1201 (2015).
 # http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE65525
@@ -27,3 +29,20 @@ for(f in files[2:length(files)]) {
 }
 
 save(kirschner, file = "data/kirschner.rda")
+
+# Sandberg
+# Deng, Q., Ramsköld, D., Reinius, B. & Sandberg, R. Single-cell RNA-seq reveals
+# dynamic, random monoallelic gene expression in mammalian cells. Science 343,
+# 193–196 (2014).
+# http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE45719
+# RPKM values are used
+
+# Linnarsson
+# Zeisel, A. et al. Brain structure. Cell types in the mouse cortex and
+# hippocampus revealed by single-cell RNA-seq. Science 347, 1138–1142 (2015).
+# http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60361
+
+# Bernstein
+# Patel, A. P. et al. Single-cell RNA-seq highlights intratumoral heterogeneity
+# in primary glioblastoma. Science 344, 1396–1401 (2014).
+# http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE57872
