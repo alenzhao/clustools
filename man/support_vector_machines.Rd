@@ -4,13 +4,16 @@
 \alias{support_vector_machines}
 \title{Support vector machine (SVM) learning on toy datasets}
 \usage{
-support_vector_machines(dataset, teach.proportion)
+support_vector_machines(dataset, teach.proportion, kern)
 }
 \arguments{
 \item{dataset}{Name of the toy dataset}
 
 \item{teach.proportion}{Proportion of cells used for teaching, the rest of the
 cells are used for studying}
+
+\item{kern}{The kernel used in training and predicting: linear, polynomal, radial,
+sigmoid. See ?svm from "clue" package for more information.}
 }
 \value{
 #' \describe{

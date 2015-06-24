@@ -244,6 +244,8 @@ nearest_neighbour_pipeline <- function(dataset, sel, distan, clust, n.dim, nn) {
 #' @param dataset Name of the toy dataset
 #' @param teach.proportion Proportion of cells used for teaching, the rest of the
 #' cells are used for studying
+#' @param kern The kernel used in training and predicting: linear, polynomal, radial,
+#' sigmoid. See ?svm from "clue" package for more information.
 #' @return 
 #' #' \describe{
 #'   \item{pred}{Predicted cell labels for cells used in study}
@@ -253,7 +255,7 @@ nearest_neighbour_pipeline <- function(dataset, sel, distan, clust, n.dim, nn) {
 #' }
 #' @examples
 #' res <- support_vector_machines("sandberg", 0.7)
-support_vector_machines <- function(dataset, teach.proportion) {
+support_vector_machines <- function(dataset, teach.proportion, kern) {
     filter1.params <- filter1_params(dataset)
     min.cells <- filter1.params$min.cells
     max.cells <- filter1.params$max.cells
@@ -276,7 +278,7 @@ support_vector_machines <- function(dataset, teach.proportion) {
     rownames(teach) <- NULL
     # length(unique(colnames(teach)))
     cat("Performing svm...\n")
-    model <- svm(teach, labs, kernel = "linear")
+    model <- svm(teach, labs, kernel = kern)
     cat("Performing prediction...\n")
     pred <- predict(model, t(study))
     cat(paste0("ARI: ",
