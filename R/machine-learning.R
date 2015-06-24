@@ -278,15 +278,20 @@ support_vector_machines <- function(dataset, teach.proportion, kern) {
     rownames(teach) <- NULL
     # length(unique(colnames(teach)))
     cat("Performing svm...\n")
-    model <- svm(teach, labs, kernel = kern)
+    model <- tryCatch(svm(teach, labs, kernel = kern),
+                      error = function(cond) return(NA))
     cat("Performing prediction...\n")
-    pred <- predict(model, t(study))
-    cat(paste0("ARI: ",
-               adjustedRandIndex(as.numeric(names(pred)), as.numeric(pred)), "\n"))
-    return(list(pred = pred,
-                ari = adjustedRandIndex(as.numeric(names(pred)), as.numeric(pred)),
-                model = model,
-                training = teach))
+    if(!is.na(model)) {
+        pred <- predict(model, t(study))
+        cat(paste0("ARI: ",
+                   adjustedRandIndex(as.numeric(names(pred)), as.numeric(pred)), "\n"))
+        return(list(pred = pred,
+                    ari = adjustedRandIndex(as.numeric(names(pred)), as.numeric(pred)),
+                    model = model,
+                    training = teach))
+    } else {
+        return(NA)
+    }
 }
 
 #' Calclulate and plot confusions
