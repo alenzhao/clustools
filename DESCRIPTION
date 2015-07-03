@@ -13,5 +13,6 @@ Imports:
     reshape2,
     ggplot2,
     e1071,
-    clue
+    clue,
+    kernlab
 LazyData: true

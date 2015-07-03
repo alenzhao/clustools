@@ -104,3 +104,13 @@ nearest_neighbor <- function(graph, nn) {
     }
     return(graph)
 }
+
+cluster_real_data <- function(d, min.cells, max.cells, min.reads, filter2, distan, clust, k, n.dim) {
+    d <- gene_filter1(d, min.cells, max.cells, min.reads)
+    d <- log2(1+d)
+    d <- gene_filter2(d, filter2)
+    dists <- calculate_distance(d, distan)
+    w <- transformation(dists, clust)
+    ids <- kmeans(w[[1]][, 1:n.dim], k, iter.max = 1e+09, nstart = 1000)
+    return(ids)
+}
