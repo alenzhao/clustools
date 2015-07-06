@@ -113,3 +113,21 @@ confusion <- function(labs, labs.known) {
     }
     return(res)
 }
+
+# consensus clustering analysis Cluster-based similarity partitioning algorithm
+consensus_clustering <- function(clusts) {
+    n.cells <- length(unlist(strsplit(clusts[1], " ")))
+    res <- matrix(0, nrow = n.cells, ncol = n.cells)
+    for (i in 1:length(clusts)) {
+        t <- clusts[i]
+        t <- as.numeric(unlist(strsplit(t, " ")))
+        t <- as.matrix(dist(t))
+        t[t != 0] <- -1
+        t[t == 0] <- 1
+        t[t == -1] <- 0
+        res <- res + t
+    }
+    res <- res/i
+    return(res)
+} 
+
