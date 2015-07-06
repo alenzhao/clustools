@@ -105,6 +105,29 @@ nearest_neighbor <- function(graph, nn) {
     return(graph)
 }
 
+#' Cluster real data
+#' 
+#' Performs kmeans clustering of real data with a given combination of filtering 1,
+#' filtering 2, distance metrics, transformation, number of clusters and number
+#' of dimensions used in clustering.
+#' 
+#' @param d Single-cell RNA-Seq dataset.
+#' @param min.cells Minimum number of cells in which a given gene is expressed.
+#' @param max.cells Maximum number of cells in which a given gene is expressed.
+#' @param min.reads Minimum number of reads per gene per cell.
+#' @param filter2 Selection method used by gene_filter2() function (either 
+#' "none", "correlation", "variance", "variance_weight", "shannon_weight")
+#' @param distan Distance metrics for calculating a distance matrix (either 
+#' "pearson", "spearman", "euclidean", "manhattan" or "minkowski").
+#' @param clust Distance matrix transformation method (either "pca", "spectral",
+#' "spectral_reg" or "mds")
+#' @param k Number of clusters
+#' @param n.dim Number of dimension of the transformed distance matrix which is used
+#' in kmeans clustering.
+#' @return kmeans results
+#' 
+#' @examples
+#' res <- cluster_real_data(quake, 3, 3, 2, "none", "spearman", "spectral", 5, 4)
 cluster_real_data <- function(d, min.cells, max.cells, min.reads, filter2, distan, clust, k, n.dim) {
     d <- gene_filter1(d, min.cells, max.cells, min.reads)
     d <- log2(1+d)
