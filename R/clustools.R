@@ -115,6 +115,8 @@ nearest_neighbor <- function(graph, nn) {
 #' @param min.cells Minimum number of cells in which a given gene is expressed.
 #' @param max.cells Maximum number of cells in which a given gene is expressed.
 #' @param min.reads Minimum number of reads per gene per cell.
+#' @param filter1 Defines whether or not to perform filter1 (see ?gene_filter1
+#' for description)
 #' @param filter2 Selection method used by gene_filter2() function (either 
 #' "none", "correlation", "variance", "variance_weight", "shannon_weight")
 #' @param distan Distance metrics for calculating a distance matrix (either 
@@ -128,8 +130,10 @@ nearest_neighbor <- function(graph, nn) {
 #' 
 #' @examples
 #' res <- cluster_real_data(quake, 3, 3, 2, "none", "spearman", "spectral", 5, 4)
-cluster_real_data <- function(d, min.cells, max.cells, min.reads, filter2, distan, clust, k, n.dim) {
-    d <- gene_filter1(d, min.cells, max.cells, min.reads)
+cluster_real_data <- function(d, min.cells, max.cells, min.reads, filter1, filter2, distan, clust, k, n.dim) {
+    if(filter1) {
+        d <- gene_filter1(d, min.cells, max.cells, min.reads)
+    }
     d <- log2(1+d)
     d <- gene_filter2(d, filter2)
     dists <- calculate_distance(d, distan)

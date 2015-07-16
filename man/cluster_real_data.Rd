@@ -4,8 +4,8 @@
 \alias{cluster_real_data}
 \title{Cluster real data}
 \usage{
-cluster_real_data(d, min.cells, max.cells, min.reads, filter2, distan, clust, k,
-  n.dim)
+cluster_real_data(d, min.cells, max.cells, min.reads, filter1, filter2, distan,
+  clust, k, n.dim)
 }
 \arguments{
 \item{d}{Single-cell RNA-Seq dataset.}
@@ -15,6 +15,9 @@ cluster_real_data(d, min.cells, max.cells, min.reads, filter2, distan, clust, k,
 \item{max.cells}{Maximum number of cells in which a given gene is expressed.}
 
 \item{min.reads}{Minimum number of reads per gene per cell.}
+
+\item{filter1}{Defines whether or not to perform filter1 (see ?gene_filter1
+for description)}
 
 \item{filter2}{Selection method used by gene_filter2() function (either
 "none", "correlation", "variance", "variance_weight", "shannon_weight")}
