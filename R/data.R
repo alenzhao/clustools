@@ -1,6 +1,9 @@
 #' Single cell RNA-Seq data extracted from a publication by Steven Quake.
 #'
-#' Source: 
+#' Source: Treutlein, B. et al. Reconstructing lineage hierarchies of the distal
+#' lung epithelium using single-cell RNA-seq. Nature 509, 371–375 (2014).
+#'
+#' \url:{http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE52583}
 #'
 #' Columns represent cells, rows represent genes expression values. Colnames
 #' respresent indexes of cell clusters (known information based on the 
@@ -46,3 +49,28 @@
 #' respresent indexes of cell clusters (known information based on the 
 #' experimental protocol). There are 3005 cells and 9 clusters in this dataset.
 "linnarsson"
+
+#' Single cell RNA-Seq data extracted from a publication by Zhong.
+#'
+#' Source: Biase, F. H., Cao, X. & Zhong, S. Cell fate inclination within 2-cell
+#' and 4-cell mouse embryos revealed by single-cell RNA sequencing. Genome Res.
+#' 24, 1787–1796 (2014).
+#' 
+#' \url{http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE57249}
+#'
+#' Columns represent cells, rows represent genes expression values. Colnames
+#' respresent indexes of cell clusters (known information based on the 
+#' experimental protocol). There are 3005 cells and 9 clusters in this dataset.
+"zhong"
+
+#' Single cell RNA-Seq data extracted from a publication by Kirschner.
+#'
+#' Source: Klein, A. M. et al. Droplet Barcoding for Single-Cell Transcriptomics
+#' Applied to Embryonic Stem Cells. Cell 161, 1187–1201 (2015).
+#' 
+#' \url{http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE65525}
+#'
+#' Columns represent cells, rows represent genes expression values. Colnames
+#' respresent indexes of cell clusters (known information based on the 
+#' experimental protocol). There are 3005 cells and 9 clusters in this dataset.
+"kirschner"
