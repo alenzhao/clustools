@@ -64,6 +64,17 @@ gene_filter2 <- function(d, method) {
     }
 }
 
+#' Calculate a distance matrix
+#' 
+#' Calculate a distance between column vectors of the input dataset using a specified
+#' distance metrics.
+#' 
+#' @param d Expression matrix with rows as genes and columns as cells
+#' @param method Distance metrics: "spearman", "pearson", "euclidean", "maximum",
+#' "manhattan", "canberra", "binary" or "minkowski"
+#' @return A distance matrix
+#' @examples
+#' calculate_distance(quake, "spearman")
 calculate_distance <- function(d, method) {
     return(if (method == "spearman") {
         # there is no spearman distance method in 'proxy' package - have to define manually
@@ -76,6 +87,16 @@ calculate_distance <- function(d, method) {
     })
 }
 
+#' Dimensionality reduction of a distance matrix
+#' 
+#' Transform a distance matrix to a new basis
+#' 
+#' @param dists A distance matrix
+#' @param method Dimensionality reduction method: "pca", "spectral", "spectral_reg" 
+#' or "mds"
+#' @return A transformed distance matrix
+#' @examples
+#' transformation(d, "spectral")
 transformation <- function(dists, method) {
     if (method == "pca") {
         t <- prcomp(dists, center = TRUE, scale. = TRUE)

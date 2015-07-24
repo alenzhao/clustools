@@ -5,7 +5,7 @@ Version: 1.0
 Date: 2015-06-02
 Author: Vladimir Kiselev
 Maintainer: <vladimir.yu.kiselev@gmail.com>
-Description: Efficient clustering of single cell high throughput data
+Description: Includes datasets used for checking different clustering strategies as well as functions needed to be able to cluster any real dataset
 License: NONE
 Imports:
     mclust,
