@@ -35,7 +35,18 @@ save(kirschner, file = "data/kirschner.rda")
 # dynamic, random monoallelic gene expression in mammalian cells. Science 343,
 # 193–196 (2014).
 # http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE45719
-# RPKM values are used
+system("sh data-raw/process-sandberg.sh")
+sandberg_new_rpkm <- read.table("inst/extdata/GSE45719_RAW/all-rpkms.txt", header = F)
+sandberg_new_rpkm <- as.matrix(sandberg_new_rpkm)
+colnames(sandberg_new_rpkm) <- sandberg_new_rpkm[1, ]
+sandberg_new_rpkm <- sandberg_new_rpkm[2:dim(sandberg_new_rpkm)[1], ]
+save(sandberg_new_rpkm, file = "data/sandberg_new_rpkm.rda")
+
+sandberg_new_read <- read.table("inst/extdata/GSE45719_RAW/all-reads.txt", header = F)
+sandberg_new_read <- as.matrix(sandberg_new_read)
+colnames(sandberg_new_read) <- sandberg_new_read[1, ]
+sandberg_new_read <- sandberg_new_read[2:dim(sandberg_new_read)[1], ]
+save(sandberg_new_read, file = "data/sandberg_new_read.rda")
 
 # Linnarsson
 # Zeisel, A. et al. Brain structure. Cell types in the mouse cortex and
