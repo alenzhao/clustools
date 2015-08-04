@@ -21,7 +21,7 @@ Applied to Embryonic Stem Cells. Cell 161, 1187–1201 (2015).
 
 Columns represent cells, rows represent genes expression values. Colnames
 respresent indexes of cell clusters (known information based on the
-experimental protocol). There are 3005 cells and 9 clusters in this dataset.
+experimental protocol). There are 2717 cells and 3 clusters in this dataset.
 }
 \keyword{datasets}
 

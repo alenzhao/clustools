@@ -22,7 +22,7 @@ and 4-cell mouse embryos revealed by single-cell RNA sequencing. Genome Res.
 
 Columns represent cells, rows represent genes expression values. Colnames
 respresent indexes of cell clusters (known information based on the
-experimental protocol). There are 3005 cells and 9 clusters in this dataset.
+experimental protocol). There are 49 cells and 3 clusters in this dataset.
 }
 \keyword{datasets}
 

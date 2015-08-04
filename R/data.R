@@ -2,9 +2,9 @@
 #'
 #' Source: Treutlein, B. et al. Reconstructing lineage hierarchies of the distal
 #' lung epithelium using single-cell RNA-seq. Nature 509, 371–375 (2014).
-#'
-#' \url:{http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE52583}
-#'
+#' 
+#' \url{http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE52583}
+#' 
 #' Columns represent cells, rows represent genes expression values. Colnames
 #' respresent indexes of cell clusters (known information based on the 
 #' experimental protocol). There are 50 cells and 5 clusters in this dataset.
@@ -60,7 +60,7 @@
 #'
 #' Columns represent cells, rows represent genes expression values. Colnames
 #' respresent indexes of cell clusters (known information based on the 
-#' experimental protocol). There are 3005 cells and 9 clusters in this dataset.
+#' experimental protocol). There are 49 cells and 3 clusters in this dataset.
 "zhong"
 
 #' Single cell RNA-Seq data extracted from a publication by Kirschner.
@@ -72,5 +72,5 @@
 #'
 #' Columns represent cells, rows represent genes expression values. Colnames
 #' respresent indexes of cell clusters (known information based on the 
-#' experimental protocol). There are 3005 cells and 9 clusters in this dataset.
+#' experimental protocol). There are 2717 cells and 3 clusters in this dataset.
 "kirschner"
