@@ -83,32 +83,12 @@ check_gene_filter1 <- function(d, min.cells, max.cells, min.reads, n.dim) {
 #' @examples
 #' filter1_params("quake")
 filter1_params <- function(dataset) {
-    cat("Performing filtering1...\n")
-    if (dataset == "quake") {
-        min.cells <- 3
-        max.cells <- 3
-        min.reads <- 2
-    } else if (dataset == "sandberg") {
-        min.cells <- 12
-        max.cells <- 12
-        min.reads <- 2
-    } else if (dataset == "linnarsson") {
-        min.cells <- 180
-        max.cells <- 180
-        min.reads <- 2
-    } else if (dataset == "bernstein") {
-        min.cells <- 0
-        max.cells <- 0
-        min.reads <- 0
-    } else if (dataset == "zhong") {
-        min.cells <- 3
-        max.cells <- 3
-        min.reads <- 2
-    } else if (dataset == "kirschner") {
-        min.cells <- 160
-        max.cells <- 160
-        min.reads <- 2
-    }
+    n.cells <- dim(dataset)[2]
+    
+    min.cells <- ceiling(0.06*n.cells)
+    max.cells <- ceiling(0.06*n.cells)
+    min.reads <- 2
+    
     return(list(min.cells = min.cells, max.cells = max.cells, min.reads = min.reads))
 }
 
