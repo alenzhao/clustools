@@ -1,5 +1,16 @@
-# Raw READS
+# cells:
+#     1-4 - zygote
+#     5-12 - early2cell
+#     13-24 - mid2cell
+#     25-34 - late2cell
+#     35-48 - 4cell
+#     49-76 - 8cell
+#     77-126 - 16cell
+#     127-169 - earlyblast
+#     170-229 - midblast
+#     230-259 - lateblast
 
+# Raw READS
 # cluster 1
 paste inst/extdata/GSE45719_RAW/GSM111*_zy* | awk '{for (i = 4; i <= NF; i += 6) printf ("%s%c", $i, i + 6 <= NF ? "\t" : "\n");}' > inst/extdata/GSE45719_RAW/1_reads-zy.txt
 sed -i '' '1s/reads/1/g' inst/extdata/GSE45719_RAW/1_reads-zy.txt
@@ -35,7 +46,6 @@ paste inst/extdata/GSE45719_RAW/*_reads-* > inst/extdata/GSE45719_RAW/all-reads.
 rm inst/extdata/GSE45719_RAW/*_reads-*
 
 # RPKMs
-
 # cluster 1
 paste inst/extdata/GSE45719_RAW/GSM111*_zy* | awk '{for (i = 3; i <= NF; i += 6) printf ("%s%c", $i, i + 6 <= NF ? "\t" : "\n");}' > inst/extdata/GSE45719_RAW/1_reads-zy.txt
 sed -i '' '1s/RPKM/1/g' inst/extdata/GSE45719_RAW/1_reads-zy.txt
