@@ -83,7 +83,7 @@ check_gene_filter1 <- function(d, min.cells, max.cells, min.reads, n.dim) {
 #' @examples
 #' filter1_params("quake")
 filter1_params <- function(dataset) {
-    n.cells <- dim(dataset)[2]
+    n.cells <- dim(get(dataset))[2]
     
     min.cells <- ceiling(0.06*n.cells)
     max.cells <- ceiling(0.06*n.cells)
