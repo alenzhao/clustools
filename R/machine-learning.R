@@ -83,7 +83,7 @@ check_gene_filter1 <- function(d, min.cells, max.cells, min.reads, n.dim) {
 #' @examples
 #' filter1_params("quake")
 filter1_params <- function(dataset) {
-    n.cells <- dim(get(dataset))[2]
+    n.cells <- dim(dataset)[2]
     
     min.cells <- ceiling(0.06*n.cells)
     max.cells <- ceiling(0.06*n.cells)
@@ -93,7 +93,7 @@ filter1_params <- function(dataset) {
 }
 
 create_distance_matrix <- function(dataset, sel, distan) {
-    filter1.params <- filter1_params(dataset)
+    filter1.params <- filter1_params(get(dataset))
     min.cells <- filter1.params$min.cells
     max.cells <- filter1.params$max.cells
     min.reads <- filter1.params$min.reads
@@ -236,7 +236,7 @@ nearest_neighbour_pipeline <- function(dataset, sel, distan, clust, n.dim, nn) {
 #' @examples
 #' res <- support_vector_machines("sandberg", 0.7)
 support_vector_machines <- function(dataset, teach.proportion, kern) {
-    filter1.params <- filter1_params(dataset)
+    filter1.params <- filter1_params(get(dataset))
     min.cells <- filter1.params$min.cells
     max.cells <- filter1.params$max.cells
     min.reads <- filter1.params$min.reads
