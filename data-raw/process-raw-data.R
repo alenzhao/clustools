@@ -21,6 +21,13 @@ quake_all_fpkm <- 3^quake_all_fpkm - 1
 save(quake_all_fpkm, file = "data/quake_all_fpkm.rda")
 system("rm inst/extdata/quake.txt")
 
+quake_all_read <- read.table("inst/extdata/quake_counts.txt", header = T)
+quake_labs <- read.table("inst/extdata/quake-labs-processed.txt", stringsAsFactors = F)
+quake_labs <- quake_labs[, 1]
+quake_all_read <- quake_all_read[ , colnames(quake_all_read) %in% quake_labs]
+save(quake_all_read, file = "data/quake_all_read.rda")
+
+
 # Sandberg
 #
 # Deng, Q., Ramsköld, D., Reinius, B. & Sandberg, R. Single-cell RNA-seq reveals
