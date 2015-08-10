@@ -8,11 +8,10 @@
 # http://www.nature.com/nature/journal/v509/n7500/extref/nature13173-s4.txt
 
 # dowload and process original data file
-system("sh data-raw/process-quake.sh")
+system("sh data-raw/quake.sh")
 # import matrix
 quake_all_fpkm <- read.table("inst/extdata/quake.txt")
 labs <- as.character(read.table("inst/extdata/quake.txt", nrows = 1))
-system("rm inst/extdata/quake.txt")
 # process matrix
 colnames(quake_all_fpkm) <- labs
 quake_all_fpkm <- as.matrix(quake_all_fpkm)
@@ -20,6 +19,7 @@ quake_all_fpkm <- quake_all_fpkm[ , 1:(dim(quake_all_fpkm)[2] - 2)]
 # convert to FPKM values (log3 values in the original file)
 quake_all_fpkm <- 3^quake_all_fpkm - 1
 save(quake_all_fpkm, file = "data/quake_all_fpkm.rda")
+system("rm inst/extdata/quake.txt")
 
 # Sandberg
 #
@@ -27,18 +27,24 @@ save(quake_all_fpkm, file = "data/quake_all_fpkm.rda")
 # dynamic, random monoallelic gene expression in mammalian cells. Science 343,
 # 193–196 (2014).
 # http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE45719
-system("sh data-raw/process-sandberg.sh")
-sandberg_new_rpkm <- read.table("inst/extdata/GSE45719_RAW/all-rpkms.txt", header = F)
-sandberg_new_rpkm <- as.matrix(sandberg_new_rpkm)
-colnames(sandberg_new_rpkm) <- sandberg_new_rpkm[1, ]
-sandberg_new_rpkm <- sandberg_new_rpkm[2:dim(sandberg_new_rpkm)[1], ]
-save(sandberg_new_rpkm, file = "data/sandberg_new_rpkm.rda")
+system("sh data-raw/sandberg.sh")
+sandberg_all_rpkm <- read.table("inst/extdata/sandberg/all-rpkms.txt", header = F)
+sandberg_all_read <- read.table("inst/extdata/sandberg/all-reads.txt", header = F)
 
-sandberg_new_read <- read.table("inst/extdata/GSE45719_RAW/all-reads.txt", header = F)
-sandberg_new_read <- as.matrix(sandberg_new_read)
-colnames(sandberg_new_read) <- sandberg_new_read[1, ]
-sandberg_new_read <- sandberg_new_read[2:dim(sandberg_new_read)[1], ]
-save(sandberg_new_read, file = "data/sandberg_new_read.rda")
+sandberg_all_rpkm <- as.matrix(sandberg_all_rpkm)
+sandberg_all_read <- as.matrix(sandberg_all_read)
+
+colnames(sandberg_all_rpkm) <- sandberg_all_rpkm[1, ]
+colnames(sandberg_all_read) <- sandberg_all_read[1, ]
+
+sandberg_all_rpkm <- sandberg_all_rpkm[2:dim(sandberg_all_rpkm)[1], ]
+sandberg_all_read <- sandberg_all_read[2:dim(sandberg_all_read)[1], ]
+
+save(sandberg_all_rpkm, file = "data/sandberg_all_rpkm.rda")
+save(sandberg_all_read, file = "data/sandberg_all_read.rda")
+
+system("rm -r inst/extdata/sandberg")
+system("rm inst/extdata/GSE45719_RAW.tar")
 
 # Zhong
 # Biase, F. H., Cao, X. & Zhong, S. Cell fate inclination within 2-cell and
