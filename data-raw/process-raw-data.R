@@ -46,6 +46,22 @@ save(sandberg_all_read, file = "data/sandberg_all_read.rda")
 system("rm -r inst/extdata/sandberg")
 system("rm inst/extdata/GSE45719_RAW.tar")
 
+# Linnarsson
+#
+# Zeisel, A. et al. Brain structure. Cell types in the mouse cortex and
+# hippocampus revealed by single-cell RNA-seq. Science 347, 1138–1142 (2015).
+# http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60361
+system("sh data-raw/linnarsson.sh")
+linnarsson <- read.table("inst/extdata/linnarsson.txt", sep = "\t", header = T)
+labs <- read.table("inst/extdata/linnarsson.txt", nrows = 1, stringsAsFactors = F)
+labs <- as.character(labs[2:length(labs)])
+rownames(linnarsson) <- linnarsson[ , 1]
+linnarsson <- linnarsson[ , 3:dim(linnarsson)[2]]
+linnarsson <- as.matrix(linnarsson)
+colnames(linnarsson) <- labs
+save(linnarsson, file = "data/linnarsson.rda")
+system("rm inst/extdata/linnarsson.txt")
+
 # Zhong
 # Biase, F. H., Cao, X. & Zhong, S. Cell fate inclination within 2-cell and
 # 4-cell mouse embryos revealed by single-cell RNA sequencing. Genome Res. 24,
@@ -77,11 +93,6 @@ for(f in files[2:length(files)]) {
 }
 
 save(kirschner, file = "data/kirschner.rda")
-
-# Linnarsson
-# Zeisel, A. et al. Brain structure. Cell types in the mouse cortex and
-# hippocampus revealed by single-cell RNA-seq. Science 347, 1138–1142 (2015).
-# http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60361
 
 # Bernstein
 # Patel, A. P. et al. Single-cell RNA-seq highlights intratumoral heterogeneity
