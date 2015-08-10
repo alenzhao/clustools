@@ -8,5 +8,4 @@ sed -i '' '1d' $DATA/linnarsson.txt
 sed -i '' '2,10d' $DATA/linnarsson.txt
 
 # assign labels
-# sed -i '' '1s/	//' $DATA/linnarsson.txt
 sed -i '' '1s/ #//' $DATA/linnarsson.txt

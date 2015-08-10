@@ -62,6 +62,12 @@ colnames(linnarsson) <- labs
 save(linnarsson, file = "data/linnarsson.rda")
 system("rm inst/extdata/linnarsson.txt")
 
+# Bernstein
+# Patel, A. P. et al. Single-cell RNA-seq highlights intratumoral heterogeneity
+# in primary glioblastoma. Science 344, 1396–1401 (2014).
+# http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE57872
+
+
 # Zhong
 # Biase, F. H., Cao, X. & Zhong, S. Cell fate inclination within 2-cell and
 # 4-cell mouse embryos revealed by single-cell RNA sequencing. Genome Res. 24,
@@ -93,8 +99,3 @@ for(f in files[2:length(files)]) {
 }
 
 save(kirschner, file = "data/kirschner.rda")
-
-# Bernstein
-# Patel, A. P. et al. Single-cell RNA-seq highlights intratumoral heterogeneity
-# in primary glioblastoma. Science 344, 1396–1401 (2014).
-# http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE57872
