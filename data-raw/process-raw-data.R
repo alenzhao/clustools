@@ -1,3 +1,45 @@
+# quake
+#
+# Treutlein, B. et al. Reconstructing lineage hierarchies of the distal lung
+# epithelium using single-cell RNA-seq. Nature 509, 371–375 (2014).
+#
+# One files required to reproduce paper results:
+# 1. File containing clusters identified by the paper's authors:
+# http://www.nature.com/nature/journal/v509/n7500/extref/nature13173-s4.txt
+
+# dowload and process original data file
+system("sh data-raw/process-quake.sh")
+# import matrix
+quake_all_fpkm <- read.table("inst/extdata/quake.txt")
+labs <- as.character(read.table("inst/extdata/quake.txt", nrows = 1))
+system("rm inst/extdata/quake.txt")
+# process matrix
+colnames(quake_all_fpkm) <- labs
+quake_all_fpkm <- as.matrix(quake_all_fpkm)
+quake_all_fpkm <- quake_all_fpkm[ , 1:(dim(quake_all_fpkm)[2] - 2)]
+# convert to FPKM values (log3 values in the original file)
+quake_all_fpkm <- 3^quake_all_fpkm - 1
+save(quake_all_fpkm, file = "data/quake_all_fpkm.rda")
+
+# Sandberg
+#
+# Deng, Q., Ramsköld, D., Reinius, B. & Sandberg, R. Single-cell RNA-seq reveals
+# dynamic, random monoallelic gene expression in mammalian cells. Science 343,
+# 193–196 (2014).
+# http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE45719
+system("sh data-raw/process-sandberg.sh")
+sandberg_new_rpkm <- read.table("inst/extdata/GSE45719_RAW/all-rpkms.txt", header = F)
+sandberg_new_rpkm <- as.matrix(sandberg_new_rpkm)
+colnames(sandberg_new_rpkm) <- sandberg_new_rpkm[1, ]
+sandberg_new_rpkm <- sandberg_new_rpkm[2:dim(sandberg_new_rpkm)[1], ]
+save(sandberg_new_rpkm, file = "data/sandberg_new_rpkm.rda")
+
+sandberg_new_read <- read.table("inst/extdata/GSE45719_RAW/all-reads.txt", header = F)
+sandberg_new_read <- as.matrix(sandberg_new_read)
+colnames(sandberg_new_read) <- sandberg_new_read[1, ]
+sandberg_new_read <- sandberg_new_read[2:dim(sandberg_new_read)[1], ]
+save(sandberg_new_read, file = "data/sandberg_new_read.rda")
+
 # Zhong
 # Biase, F. H., Cao, X. & Zhong, S. Cell fate inclination within 2-cell and
 # 4-cell mouse embryos revealed by single-cell RNA sequencing. Genome Res. 24,
@@ -29,24 +71,6 @@ for(f in files[2:length(files)]) {
 }
 
 save(kirschner, file = "data/kirschner.rda")
-
-# Sandberg
-# Deng, Q., Ramsköld, D., Reinius, B. & Sandberg, R. Single-cell RNA-seq reveals
-# dynamic, random monoallelic gene expression in mammalian cells. Science 343,
-# 193–196 (2014).
-# http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE45719
-system("sh data-raw/process-sandberg.sh")
-sandberg_new_rpkm <- read.table("inst/extdata/GSE45719_RAW/all-rpkms.txt", header = F)
-sandberg_new_rpkm <- as.matrix(sandberg_new_rpkm)
-colnames(sandberg_new_rpkm) <- sandberg_new_rpkm[1, ]
-sandberg_new_rpkm <- sandberg_new_rpkm[2:dim(sandberg_new_rpkm)[1], ]
-save(sandberg_new_rpkm, file = "data/sandberg_new_rpkm.rda")
-
-sandberg_new_read <- read.table("inst/extdata/GSE45719_RAW/all-reads.txt", header = F)
-sandberg_new_read <- as.matrix(sandberg_new_read)
-colnames(sandberg_new_read) <- sandberg_new_read[1, ]
-sandberg_new_read <- sandberg_new_read[2:dim(sandberg_new_read)[1], ]
-save(sandberg_new_read, file = "data/sandberg_new_read.rda")
 
 # Linnarsson
 # Zeisel, A. et al. Brain structure. Cell types in the mouse cortex and
