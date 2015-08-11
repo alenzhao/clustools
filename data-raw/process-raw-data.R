@@ -37,19 +37,14 @@ save(quake_all_read, file = "data/quake_all_read.rda")
 system("sh data-raw/sandberg.sh")
 sandberg_all_rpkm <- read.table("inst/extdata/sandberg/all-rpkms.txt", header = F)
 sandberg_all_read <- read.table("inst/extdata/sandberg/all-reads.txt", header = F)
-
 sandberg_all_rpkm <- as.matrix(sandberg_all_rpkm)
 sandberg_all_read <- as.matrix(sandberg_all_read)
-
 colnames(sandberg_all_rpkm) <- sandberg_all_rpkm[1, ]
 colnames(sandberg_all_read) <- sandberg_all_read[1, ]
-
 sandberg_all_rpkm <- sandberg_all_rpkm[2:dim(sandberg_all_rpkm)[1], ]
 sandberg_all_read <- sandberg_all_read[2:dim(sandberg_all_read)[1], ]
-
 save(sandberg_all_rpkm, file = "data/sandberg_all_rpkm.rda")
 save(sandberg_all_read, file = "data/sandberg_all_read.rda")
-
 system("rm -r inst/extdata/sandberg")
 system("rm inst/extdata/GSE45719_RAW.tar")
 
@@ -86,21 +81,18 @@ colnames(zhong) <- c(rep(1, 9), rep(2, 20), rep(3, 20))
 save(zhong, file = "data/zhong.rda")
 
 # Kirschner
+#
 # Klein, A. M. et al. Droplet Barcoding for Single-Cell Transcriptomics Applied
 # to Embryonic Stem Cells. Cell 161, 1187–1201 (2015).
 # http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE65525
-
 system("sh data-raw/kirschner.sh")
 kirschner <- read.table("inst/extdata/kirschner/reads.txt", sep = ",", row.names = 1)
 kirschner <- as.matrix(kirschner)
-
 d0 <- read.table("inst/extdata/kirschner/d0.txt")
 d2 <- read.table("inst/extdata/kirschner/d2.txt")
 d4 <- read.table("inst/extdata/kirschner/d4.txt")
 d7 <- read.table("inst/extdata/kirschner/d7.txt")
-
 colnames(kirschner) <- c(rep(1, d0 - 1), rep(2, d2 - 1), rep(3, d4 - 1), rep(4, d7 - 1))
-
 save(kirschner, file = "data/kirschner.rda")
 system("rm -r inst/extdata/kirschner")
 system("rm inst/extdata/GSE65525.tar")
