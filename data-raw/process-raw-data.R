@@ -89,20 +89,18 @@ save(zhong, file = "data/zhong.rda")
 # Klein, A. M. et al. Droplet Barcoding for Single-Cell Transcriptomics Applied
 # to Embryonic Stem Cells. Cell 161, 1187–1201 (2015).
 # http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE65525
-files <- list.files("inst/extdata")
-files <- files[grepl("GSM15994", files)]
 
-kirschner <- read.csv(paste0("inst/extdata/", files[1]))
-kirschner <- as.matrix(kirschner[2:dim(kirschner)[2]])
-colnames(kirschner) <- rep(1, dim(kirschner)[2])
+system("sh data-raw/kirschner.sh")
+kirschner <- read.table("inst/extdata/kirschner/reads.txt", sep = ",", row.names = 1)
+kirschner <- as.matrix(kirschner)
 
-i <- 2
-for(f in files[2:length(files)]) {
-    d <- read.csv(paste0("inst/extdata/", f))
-    d <- as.matrix(d[2:dim(d)[2]])
-    colnames(d) <- rep(i, dim(d)[2])
-    i <- i + 1
-    kirschner <- cbind(kirschner, d)
-}
+d0 <- read.table("inst/extdata/kirschner/d0.txt")
+d2 <- read.table("inst/extdata/kirschner/d2.txt")
+d4 <- read.table("inst/extdata/kirschner/d4.txt")
+d7 <- read.table("inst/extdata/kirschner/d7.txt")
+
+colnames(kirschner) <- c(rep(1, d0 - 1), rep(2, d2 - 1), rep(3, d4 - 1), rep(4, d7 - 1))
 
 save(kirschner, file = "data/kirschner.rda")
+system("rm -r inst/extdata/kirschner")
+system("rm inst/extdata/GSE65525.tar")
