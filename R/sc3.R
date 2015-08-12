@@ -201,7 +201,8 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                     }
                 }
                 pheatmap(dataset[ , labs], cluster_cols = F, gaps_col = gaps_col,
-                         show_rownames = F, show_colnames = F)
+                         color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(median(as.numeric(unlist(cons.table[,3])))),
+                         kmeans_k = 10, show_rownames = F, show_colnames = F)
             }, height = 600, width = 600)
             output$labels <- renderUI({
                 d <- get_consensus()[[2]]
