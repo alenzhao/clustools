@@ -158,7 +158,7 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
             mainPanel(
                 tabsetPanel(
                     tabPanel("Consensus Matrix", plotOutput('plot')),
-                    tabPanel("Expression matrix", htmlOutput('matrix')),
+                    tabPanel("Expression matrix", plotOutput('matrix')),
                     tabPanel("Cell Labels", div(htmlOutput('labels'), style = "font-size:80%"))
                 )
             )
@@ -190,13 +190,17 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
             output$matrix <- renderPlot({
                 d <- get_consensus()[[2]]
                 labs <- NULL
+                gaps_col <- NULL
+                gap <- 0
                 for(i in 1:input$clusters) {
                     ind <- as.numeric(unlist(strsplit(as.character(d[i, ]), " ")))
+                    gap <- gap + length(ind)
                     labs <- c(labs, ind)
+                    if(i != input$clusters) {
+                        gaps_col <- c(gaps_col, gap)
+                    }
                 }
-                pheatmap(dataset[ , labs],
-                         color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(median(as.numeric(unlist(cons.table[,3])))),
-                         cutree_rows = input$clusters, cutree_cols = input$clusters,
+                pheatmap(dataset[ , labs], cluster_cols = F, gaps_col = gaps_col,
                          show_rownames = F, show_colnames = F)
             }, height = 600, width = 600)
             output$labels <- renderUI({
