@@ -7,12 +7,17 @@ Author: Vladimir Kiselev
 Maintainer: <vladimir.yu.kiselev@gmail.com>
 Description: Includes datasets used for checking different clustering strategies as well as functions needed to be able to cluster any real dataset
 License: NONE
-Imports:
+Depends:
     mclust,
     clusterCrit,
     reshape2,
     ggplot2,
     e1071,
     clue,
-    kernlab
+    shiny,
+    parallel,
+    foreach,
+    doParallel,
+    pheatmap,
+    RColorBrewer
 LazyData: true
