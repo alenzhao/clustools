@@ -54,7 +54,9 @@ all_clusterings <- function(filename, ks) {
     names(dists) <- distances
     
     cat("Performing kmeans clusterings...\n")
-    labs = foreach(i = 1:dim(hash.table)[1], .packages = "clustools", .combine = rbind) %dopar% {
+    labs = foreach(i = 1:dim(hash.table)[1],
+                   .packages = "clustools",
+                   .combine = rbind) %dopar% {
         try({
             t <- transformation(get(hash.table[i, 1], dists), hash.table[i, 2])[[1]]
             paste(kmeans(t[, 1:hash.table[i, 4]],
@@ -101,15 +103,19 @@ all_clusterings <- function(filename, ks) {
             clust <- hclust(diss)
             clusts <- cutree(clust, k = as.numeric(all.combinations[i, 3]))
             
+            markers <- get_marker_genes(dataset, clusts)
+            de_genes <- kruskal_statistics(dataset, clusts)
+            
             labs <- NULL
             for(j in 1:as.numeric(all.combinations[i, 3])) {
                 labs <- rbind(labs, paste(names(clusts[clusts == j]), collapse = " "))
+            
             }
+
             labs <- as.data.frame(labs)
             colnames(labs) <- "Labels"
-            # rownames(labs) <- paste("Cluster", 1:as.numeric(all.combinations[i, 3]))
-            
-            return(list(dat, labs))
+
+            return(list(dat, labs, markers, de_genes))
         })
     }
     
@@ -159,7 +165,8 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                 tabsetPanel(
                     tabPanel("Consensus Matrix", plotOutput('plot')),
                     tabPanel("Expression matrix", plotOutput('matrix')),
-                    tabPanel("Cell Labels", div(htmlOutput('labels'), style = "font-size:80%"))
+                    tabPanel("Cell Labels", div(htmlOutput('labels'), style = "font-size:80%")),
+                    tabPanel("DE and Marker genes", htmlOutput('genes'))
                 )
             )
         ),
@@ -170,12 +177,14 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                                       as.numeric(cons.table[ , 3]) == input$clusters, 4]
                 return(res[[1]])
             })
+            
             get_consensus_1 <- reactive({
                 res <- cons.table[unlist(lapply(dist.opts, function(x){setequal(x, input$distance)})) &
                                       unlist(lapply(dim.red.opts, function(x){setequal(x, input$dimRed)})) &
                                       as.numeric(cons.table[ , 3]) == (input$clusters - 1), 4]
                 return(res[[1]])
             })
+            
             output$plot <- renderPlot({
                 d <- get_consensus()[[1]]
                 show_labs <- TRUE
@@ -187,6 +196,7 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                          cutree_rows = input$clusters, cutree_cols = input$clusters,
                          show_rownames = show_labs, show_colnames = show_labs)
             }, height = 600, width = 600)
+            
             output$matrix <- renderPlot({
                 d <- get_consensus()[[2]]
                 labs <- NULL
@@ -204,6 +214,16 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                          color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(median(as.numeric(unlist(cons.table[,3])))),
                          kmeans_k = 10, show_rownames = F, show_colnames = F)
             }, height = 600, width = 600)
+            
+            output$genes <- renderUI({
+                data <- get_consensus()
+                markers <- data[[3]]
+                de_genes <- data[[4]]
+
+                HTML(paste0(de_genes))
+                HTML(paste0(markers))
+            })
+            
             output$labels <- renderUI({
                 d <- get_consensus()[[2]]
                 d1 <- get_consensus_1()[[2]]
@@ -228,6 +248,7 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                 
                 HTML(paste0(labs))
             })
+            
             output$datalink <- downloadHandler(
                 filename <- function() {
                     paste0("Exp", input$replicate, "-", input$norm, "-k=", input$clusters, "-labels.csv")
@@ -248,39 +269,3 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
         }
     )
 }
-
-getAUC <- function(gene, labels) {
-    score <- rank(gene)
-    # Get average score for each cluster
-    ms <- aggregate(score ~ labels, FUN = mean)
-    # Get cluster with highest average score
-    posgroup <- ms[ms$score == max(ms$score), ]$labels
-    # Return negatives if there is a tie for cluster with highest average score
-    # (by definition this is not cluster specific)
-    if(length(posgroup) > 1) {
-        return (c(-1,-1))
-    }
-    # Create 1/0 vector of truths for predictions, cluster with highest average score vs everything else
-    truth <- as.numeric(labels == posgroup)
-    #Make predictions & get auc using RCOR package.
-    pred <- prediction(score,truth)
-    val <- unlist(performance(pred,"auc")@y.values)
-    return(c(val,posgroup))
-}
-
-get_marker_genes <- function(dataset, labels) {
-    geneAUCs <- apply(dataset, 1, getAUC, labels = labels)
-    geneAUCsdf <- data.frame(matrix(unlist(geneAUCs), nrow=length(geneAUCs)/2, byrow=T))
-    rownames(geneAUCsdf) <- rownames(dataset)
-    colnames(geneAUCsdf) <- c("AUC","Group")
-    geneAUCsdf <- geneAUCsdf[geneAUCsdf$AUC > 0.8,]
-    geneAUCsdf <- geneAUCsdf[order(geneAUCsdf[,1], decreasing = T),]
-}
-
-kruskal_statistics <- function(dataset, labels) {
-    t <- apply(dataset, 1, kruskal.test, g = factor(labels))
-    ps <- unlist(lapply(t, "[[", "p.value"))
-    ps <- p.adjust(ps, "bonferroni")
-}
-
-
