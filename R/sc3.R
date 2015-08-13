@@ -238,7 +238,7 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
             })
             
             output$de_genes <- renderTable({
-                head(get_de_genes())
+                head(as.data.frame(get_de_genes()))
             })
             
             output$mark_genes <- renderTable({
