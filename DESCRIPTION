@@ -19,5 +19,6 @@ Depends:
     foreach,
     doParallel,
     pheatmap,
-    RColorBrewer
+    RColorBrewer,
+    ROCR
 LazyData: true
