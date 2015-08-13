@@ -103,9 +103,6 @@ all_clusterings <- function(filename, ks) {
             clust <- hclust(diss)
             clusts <- cutree(clust, k = as.numeric(all.combinations[i, 3]))
             
-            markers <- get_marker_genes(dataset, clusts)
-            de_genes <- kruskal_statistics(dataset, clusts)
-            
             labs <- NULL
             for(j in 1:as.numeric(all.combinations[i, 3])) {
                 labs <- rbind(labs, paste(names(clusts[clusts == j]), collapse = " "))
@@ -115,7 +112,7 @@ all_clusterings <- function(filename, ks) {
             labs <- as.data.frame(labs)
             colnames(labs) <- "Labels"
 
-            return(list(dat, labs, markers, de_genes))
+            return(list(dat, labs))
         })
     }
     
@@ -157,8 +154,12 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                 checkboxGroupInput("dimRed", label = "Dimensionality reduction",
                                    choices = dimensionality.reductions,
                                    selected = dimensionality.reductions[1]),
+                div("\n"), div("\n"),
+                actionButton("get_de_genes", label = "Get DE genes"),
+                div("\n"), div("\n"),
+                actionButton("get_mark_genes", label = "Get Marker genes"),
                 
-                div("\n"),
+                div("\n"), div("\n"),
                 downloadLink('datalink', label = "Download Labels")
             ),
             mainPanel(
@@ -166,7 +167,8 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                     tabPanel("Consensus Matrix", plotOutput('plot')),
                     tabPanel("Expression matrix", plotOutput('matrix')),
                     tabPanel("Cell Labels", div(htmlOutput('labels'), style = "font-size:80%")),
-                    tabPanel("DE and Marker genes", htmlOutput('genes'))
+                    tabPanel("DE genes", tableOutput('de_genes')),
+                    tabPanel("Marker genes", tableOutput('mark_genes'))
                 )
             )
         ),
@@ -215,13 +217,32 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                          kmeans_k = 10, show_rownames = F, show_colnames = F)
             }, height = 600, width = 600)
             
-            output$genes <- renderUI({
-                data <- get_consensus()
-                markers <- data[[3]]
-                de_genes <- data[[4]]
-
-                HTML(paste0(de_genes))
-                HTML(paste0(markers))
+            get_de_genes <- eventReactive(input$get_de_genes, {
+                d <- get_consensus()[[2]]
+                labs <- rep(1, dim(dataset)[2])
+                for(i in 2:input$clusters) {
+                    ind <- as.numeric(unlist(strsplit(as.character(d[i, ]), " ")))
+                    labs[ind] <- i
+                }
+                kruskal_statistics(dataset, labs)
+            })
+            
+            get_mark_genes <- eventReactive(input$get_mark_genes, {
+                d <- get_consensus()[[2]]
+                labs <- rep(1, dim(dataset)[2])
+                for(i in 2:input$clusters) {
+                    ind <- as.numeric(unlist(strsplit(as.character(d[i, ]), " ")))
+                    labs[ind] <- i
+                }
+                get_marker_genes(dataset, labs)
+            })
+            
+            output$de_genes <- renderTable({
+                head(get_de_genes())
+            })
+            
+            output$mark_genes <- renderTable({
+                head(get_mark_genes())
             })
             
             output$labels <- renderUI({
