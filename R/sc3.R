@@ -20,7 +20,8 @@ all_clusterings <- function(filename, ks) {
     min.reads <- filter1.params$min.reads
     dataset <- gene_filter1(dataset, min.cells, max.cells, min.reads)
     
-    if(filename == "linnarsson" | filename == "kirschner") {
+    if(dim(dataset)[2] > 300) {
+        original_dataset <- dataset
         dataset <- dataset[, sample(1:dim(dataset)[2], 300)]
     }
     
@@ -121,10 +122,12 @@ all_clusterings <- function(filename, ks) {
     # stop local cluster
     stopCluster(cl)
     
-    show_consensus(filename, distances, dimensionality.reductions, cbind(all.combinations, cons), dataset)
+    show_consensus(filename, distances, dimensionality.reductions,
+                   cbind(all.combinations, cons),
+                   dataset, original_dataset)
 }
 
-show_consensus <- function(filename, distances, dimensionality.reductions, cons.table, dataset) {
+show_consensus <- function(filename, distances, dimensionality.reductions, cons.table, dataset, original_dataset) {
     
     dist.opts <- strsplit(unlist(cons.table[,1]), " ")
     dim.red.opts <- strsplit(unlist(cons.table[,2]), " ")
@@ -162,9 +165,12 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                 actionButton("get_de_genes", label = "Get DE genes"),
                 div("\n"), div("\n"),
                 actionButton("get_mark_genes", label = "Get Marker genes"),
+                div("\n"), div("\n"),
+                actionButton("svm", label = "Run SVM"),
                 
                 div("\n"), div("\n"),
-                downloadLink('datalink', label = "Download Labels")
+                downloadLink('datalink', label = "Download Labels"),
+                downloadLink('svm', label = "Download Predicted Labels")
             ),
             mainPanel(
                 tabsetPanel(
@@ -286,6 +292,10 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                          gaps_col = gaps_col)
             })
             
+            get_svm <- eventReactive(input$svm, {
+                prediction <- support_vector_machines()
+            })
+            
             output$de_genes <- renderPlot({
                 get_de_genes()
             }, height = plot.height, width = plot.width)
@@ -333,6 +343,15 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                         d[inds] <- i
                     }
                     
+                    write.table(d, file = file)
+                }
+            )
+            output$svmlink <- downloadHandler(
+                filename <- function() {
+                    paste0("k=", input$clusters, "-svm-labels.csv")
+                },
+                content <- function(file) {
+                    d <- get_svm()
                     write.table(d, file = file)
                 }
             )
