@@ -21,7 +21,7 @@ all_clusterings <- function(filename, ks) {
     dataset <- gene_filter1(dataset, min.cells, max.cells, min.reads)
     
     if(filename == "linnarsson" | filename == "kirschner") {
-        dataset <- dataset[, sample(1:dim(dataset)[2], 500)]
+        dataset <- dataset[, sample(1:dim(dataset)[2], 300)]
     }
     
     n.cells <- dim(dataset)[2]
