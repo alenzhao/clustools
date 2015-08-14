@@ -135,6 +135,10 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
     dimensionality.reductions <- as.list(dimensionality.reductions)
     names(dimensionality.reductions) <- dimensionality.reductions
     
+    colour.pallete <- colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(median(as.numeric(unlist(cons.table[,3]))))
+    plot.width <- 600
+    plot.height <- 600
+    
     shinyApp(
         ui = pageWithSidebar(
             headerPanel(
@@ -167,8 +171,8 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                     tabPanel("Consensus Matrix", plotOutput('plot')),
                     tabPanel("Expression matrix", plotOutput('matrix')),
                     tabPanel("Cell Labels", div(htmlOutput('labels'), style = "font-size:80%")),
-                    tabPanel("DE genes", tableOutput('de_genes')),
-                    tabPanel("Marker genes", tableOutput('mark_genes'))
+                    tabPanel("DE genes", plotOutput('de_genes')),
+                    tabPanel("Marker genes", plotOutput('mark_genes'))
                 )
             )
         ),
@@ -187,6 +191,21 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                 return(res[[1]])
             })
             
+            sort_cells_by_clusters <- isolate(function(labs.table) {
+                labs <- NULL
+                gaps_col <- NULL
+                gap <- 0
+                for(i in 1:input$clusters) {
+                    ind <- as.numeric(unlist(strsplit(as.character(labs.table[i, ]), " ")))
+                    gap <- gap + length(ind)
+                    labs <- c(labs, ind)
+                    if(i != input$clusters) {
+                        gaps_col <- c(gaps_col, gap)
+                    }
+                }
+                return(list(labs, gaps_col))
+            })
+            
             output$plot <- renderPlot({
                 d <- get_consensus()[[1]]
                 show_labs <- TRUE
@@ -194,28 +213,20 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                     show_labs <- FALSE
                 }
                 pheatmap(d,
-                         color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(median(as.numeric(unlist(cons.table[,3])))),
+                         color = colour.pallete,
                          cutree_rows = input$clusters, cutree_cols = input$clusters,
                          show_rownames = show_labs, show_colnames = show_labs)
-            }, height = 600, width = 600)
+            }, height = plot.height, width = plot.width)
             
             output$matrix <- renderPlot({
                 d <- get_consensus()[[2]]
-                labs <- NULL
-                gaps_col <- NULL
-                gap <- 0
-                for(i in 1:input$clusters) {
-                    ind <- as.numeric(unlist(strsplit(as.character(d[i, ]), " ")))
-                    gap <- gap + length(ind)
-                    labs <- c(labs, ind)
-                    if(i != input$clusters) {
-                        gaps_col <- c(gaps_col, gap)
-                    }
-                }
+                d <- sort_cells_by_clusters(d)
+                labs <- d[[1]]
+                gaps_col <- d[[2]]
                 pheatmap(dataset[ , labs], cluster_cols = F, gaps_col = gaps_col,
-                         color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(median(as.numeric(unlist(cons.table[,3])))),
+                         color = colour.pallete,
                          kmeans_k = 10, show_rownames = F, show_colnames = F)
-            }, height = 600, width = 600)
+            }, height = plot.height, width = plot.width)
             
             get_de_genes <- eventReactive(input$get_de_genes, {
                 d <- get_consensus()[[2]]
@@ -224,7 +235,26 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                     ind <- as.numeric(unlist(strsplit(as.character(d[i, ]), " ")))
                     labs[ind] <- i
                 }
-                kruskal_statistics(dataset, labs)
+                res <- kruskal_statistics(dataset, labs)
+                res <- head(res, 70)
+                d <- sort_cells_by_clusters(d)
+                labs <- d[[1]]
+                gaps_col <- d[[2]]
+                d <- dataset[rownames(dataset) %in% names(res), labs]
+                d <- d[names(res), ]
+                
+                p.value.ann <- split(res, ceiling(seq_along(res)/17))
+                p.value.ranges <- as.vector(unlist(lapply(p.value.ann, function(x){rep(max(x), length(x))})))
+                p.value.ranges <- format(p.value.ranges, scientific = T, digits = 2)
+                p.value.ranges <- paste("<", p.value.ranges, sep=" ")
+                
+                p.value.ann <- data.frame(p.value = factor(p.value.ranges, levels = unique(p.value.ranges)))
+                rownames(p.value.ann) <- names(res)
+                
+                pheatmap(d,
+                         color = colour.pallete, show_colnames = F,
+                         cluster_cols = F, cluster_rows = F,
+                         gaps_col = gaps_col, annotation_row = p.value.ann)
             })
             
             get_mark_genes <- eventReactive(input$get_mark_genes, {
@@ -234,16 +264,35 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                     ind <- as.numeric(unlist(strsplit(as.character(d[i, ]), " ")))
                     labs[ind] <- i
                 }
-                get_marker_genes(dataset, labs)
+                res <- get_marker_genes(dataset, labs)
+                res1 <- NULL
+                for(i in 1:input$clusters) {
+                    tmp <- res[res[,2] == i, ]
+                    if(dim(tmp)[1] > 10) {
+                        tmp <- tmp[1:10, ]
+                    }
+                    res1 <- rbind(res1, tmp)
+                }
+                
+                d <- sort_cells_by_clusters(d)
+                labs <- d[[1]]
+                gaps_col <- d[[2]]
+                d <- dataset[rownames(dataset) %in% rownames(res1), labs]
+                d <- d[rownames(res1), ]
+                
+                pheatmap(d,
+                         color = colour.pallete, show_colnames = F,
+                         cluster_cols = F, cluster_rows = F,
+                         gaps_col = gaps_col)
             })
             
-            output$de_genes <- renderTable({
-                head(as.data.frame(get_de_genes()))
-            })
+            output$de_genes <- renderPlot({
+                get_de_genes()
+            }, height = plot.height, width = plot.width)
             
-            output$mark_genes <- renderTable({
-                head(get_mark_genes())
-            })
+            output$mark_genes <- renderPlot({
+               get_mark_genes()
+            }, height = plot.height, width = plot.width)
             
             output$labels <- renderUI({
                 d <- get_consensus()[[2]]
