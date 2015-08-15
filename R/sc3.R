@@ -20,9 +20,10 @@ all_clusterings <- function(filename, ks) {
     min.reads <- filter1.params$min.reads
     dataset <- gene_filter1(dataset, min.cells, max.cells, min.reads)
     
-    if(dim(dataset)[2] > 300) {
-        original_dataset <- dataset
-        dataset <- dataset[, sample(1:dim(dataset)[2], 300)]
+    if(dim(dataset)[2] > 1000) {
+        working.sample <- sample(1:dim(dataset)[2], 1000)
+        study.dataset <- dataset[ , setdiff(1:dim(dataset)[2], working.sample)]
+        dataset <- dataset[, working.sample]
     }
     
     n.cells <- dim(dataset)[2]
@@ -63,7 +64,7 @@ all_clusterings <- function(filename, ks) {
             paste(kmeans(t[, 1:hash.table[i, 4]],
                          hash.table[i, 3],
                          iter.max = 1e+09,
-                         nstart = 1000)$cluster,
+                         nstart = 100)$cluster,
                   collapse = " ")
         })
     }
@@ -124,10 +125,10 @@ all_clusterings <- function(filename, ks) {
     
     show_consensus(filename, distances, dimensionality.reductions,
                    cbind(all.combinations, cons),
-                   dataset, original_dataset)
+                   dataset, study.dataset)
 }
 
-show_consensus <- function(filename, distances, dimensionality.reductions, cons.table, dataset, original_dataset) {
+show_consensus <- function(filename, distances, dimensionality.reductions, cons.table, dataset, study.dataset) {
     
     dist.opts <- strsplit(unlist(cons.table[,1]), " ")
     dim.red.opts <- strsplit(unlist(cons.table[,2]), " ")
@@ -170,6 +171,7 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                 
                 div("\n"), div("\n"),
                 downloadLink('datalink', label = "Download Labels"),
+                div("\n"),
                 downloadLink('svm', label = "Download Predicted Labels")
             ),
             mainPanel(
@@ -293,7 +295,16 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
             })
             
             get_svm <- eventReactive(input$svm, {
-                prediction <- support_vector_machines()
+                d <- get_consensus()[[2]]
+                labs <- rep(1, dim(dataset)[2])
+                for(i in 2:input$clusters) {
+                    ind <- as.numeric(unlist(strsplit(as.character(d[i, ]), " ")))
+                    labs[ind] <- i
+                }
+                colnames(dataset) <- labs
+                cat("svm prediction started")
+                prediction <- support_vector_machines1(dataset, study.dataset, "linear")
+                cat("svm prediction finished")
             })
             
             output$de_genes <- renderPlot({
