@@ -278,7 +278,6 @@ support_vector_machines1 <- function(teach, study, kern) {
     cat("Dimensions of teacher:\n")
     cat(dim(teach))
     cat("\n")
-    study <- dat[ , setdiff(1:dim(dat)[2], samp)]
     cat("Dimensions of study:\n")
     cat(dim(study))
     cat("\n")

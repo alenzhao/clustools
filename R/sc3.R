@@ -10,18 +10,25 @@ all_clusterings <- function(filename, ks) {
         }
     }
     
+    svm.num.cells <- 500
     distances <- c("euclidean", "pearson", "spearman")
     dimensionality.reductions <- c("pca", "spectral")
     
-    cat("Preliminary gene filtering...\n")
+    cat("1. Preliminary gene filtering...\n")
     filter1.params <- filter1_params(dataset)
     min.cells <- filter1.params$min.cells
     max.cells <- filter1.params$max.cells
     min.reads <- filter1.params$min.reads
     dataset <- gene_filter1(dataset, min.cells, max.cells, min.reads)
     
-    if(dim(dataset)[2] > 1000) {
-        working.sample <- sample(1:dim(dataset)[2], 1000)
+    if(dim(dataset)[2] > svm.num.cells) {
+        cat("\n")
+        cat("Your dataset contains more than 1000 cells, therefore clustering
+            wil be performed on a random sample of 1000 cells, the rest of the
+            cells will be predicted using SVM.")
+        cat("\n")
+        cat("\n")
+        working.sample <- sample(1:dim(dataset)[2], svm.num.cells)
         study.dataset <- dataset[ , setdiff(1:dim(dataset)[2], working.sample)]
         dataset <- dataset[, working.sample]
     }
@@ -38,7 +45,7 @@ all_clusterings <- function(filename, ks) {
                               k = c(min(ks) - 1, ks),
                               n.dim = n.dim, stringsAsFactors = F)
     
-    cat("Log2-transforming data...\n")
+    cat("2. Log2-transforming data...\n")
     if(filename != "bernstein") {
         dataset <- log2(1 + dataset)
     }
@@ -47,7 +54,7 @@ all_clusterings <- function(filename, ks) {
     cl <- makeCluster(detectCores() - 1)
     registerDoParallel(cl, cores = detectCores() - 1)
     
-    cat("Calculating distance matrices...\n")
+    cat("3. Calculating distance matrices...\n")
     dists = foreach(i = distances, .packages = "clustools") %dopar% {
         try({
             calculate_distance(dataset, i)
@@ -55,7 +62,7 @@ all_clusterings <- function(filename, ks) {
     }
     names(dists) <- distances
     
-    cat("Performing kmeans clusterings...\n")
+    cat("4. Performing dimensionality reduction and kmeans clusterings...\n")
     labs = foreach(i = 1:dim(hash.table)[1],
                    .packages = "clustools",
                    .combine = rbind) %dopar% {
@@ -64,7 +71,7 @@ all_clusterings <- function(filename, ks) {
             paste(kmeans(t[, 1:hash.table[i, 4]],
                          hash.table[i, 3],
                          iter.max = 1e+09,
-                         nstart = 100)$cluster,
+                         nstart = 1000)$cluster,
                   collapse = " ")
         })
     }
@@ -73,7 +80,7 @@ all_clusterings <- function(filename, ks) {
     res$labs <- as.character(res$labs)
     rownames(res) <- NULL
     
-    cat("Computing consensus clusterings and labels...\n")
+    cat("5. Computing consensus matrix and labels...\n")
     all.combinations <- NULL
     for(k in c(min(ks) - 1, ks)) {
         for(i in 1:length(distances)) {
@@ -144,12 +151,12 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
     plot.height <- 600
     
     shinyApp(
-        ui = pageWithSidebar(
+        ui = fluidPage(
             headerPanel(
                 HTML("SC<sup>3</sup> - Single-Cell Consensus Clustering")
             ),
             sidebarPanel(
-                
+                h4("1. Clustering"),
                 sliderInput("clusters", label = "k",
                             min = min(as.numeric(unlist(cons.table[,3]))) + 1,
                             max = max(as.numeric(unlist(cons.table[,3]))),
@@ -162,17 +169,15 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                 checkboxGroupInput("dimRed", label = "Dimensionality reduction",
                                    choices = dimensionality.reductions,
                                    selected = dimensionality.reductions[1]),
-                div("\n"), div("\n"),
+                h4("2. Gene identificatiion"),
+                p("\n\n"),
                 actionButton("get_de_genes", label = "Get DE genes"),
-                div("\n"), div("\n"),
+                p("\n\n"),
                 actionButton("get_mark_genes", label = "Get Marker genes"),
-                div("\n"), div("\n"),
-                actionButton("svm", label = "Run SVM"),
-                
-                div("\n"), div("\n"),
-                downloadLink('datalink', label = "Download Labels"),
-                div("\n"),
-                downloadLink('svm', label = "Download Predicted Labels")
+
+                h4("3. Save results"),
+                p("\n\n"),
+                downloadLink('datalink', label = "Save cell labels")
             ),
             mainPanel(
                 tabsetPanel(
@@ -220,10 +225,12 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                 if(dim(d)[1] > 80) {
                     show_labs <- FALSE
                 }
-                pheatmap(d,
-                         color = colour.pallete,
-                         cutree_rows = input$clusters, cutree_cols = input$clusters,
-                         show_rownames = show_labs, show_colnames = show_labs)
+                withProgress(message = 'Plotting...', value = 0, {
+                    pheatmap(d,
+                             color = colour.pallete,
+                             cutree_rows = input$clusters, cutree_cols = input$clusters,
+                             show_rownames = show_labs, show_colnames = show_labs)
+                })
             }, height = plot.height, width = plot.width)
             
             output$matrix <- renderPlot({
@@ -231,9 +238,11 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                 d <- sort_cells_by_clusters(d)
                 labs <- d[[1]]
                 gaps_col <- d[[2]]
-                pheatmap(dataset[ , labs], cluster_cols = F, gaps_col = gaps_col,
-                         color = colour.pallete,
-                         kmeans_k = 10, show_rownames = F, show_colnames = F)
+                withProgress(message = 'Plotting...', value = 0, {
+                    pheatmap(dataset[ , labs], cluster_cols = F, gaps_col = gaps_col,
+                             color = colour.pallete,
+                             kmeans_k = 10, show_rownames = F, show_colnames = F)
+                })
             }, height = plot.height, width = plot.width)
             
             get_de_genes <- eventReactive(input$get_de_genes, {
@@ -294,25 +303,31 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                          gaps_col = gaps_col)
             })
             
-            get_svm <- eventReactive(input$svm, {
-                d <- get_consensus()[[2]]
-                labs <- rep(1, dim(dataset)[2])
-                for(i in 2:input$clusters) {
-                    ind <- as.numeric(unlist(strsplit(as.character(d[i, ]), " ")))
-                    labs[ind] <- i
-                }
-                colnames(dataset) <- labs
-                cat("svm prediction started")
-                prediction <- support_vector_machines1(dataset, study.dataset, "linear")
-                cat("svm prediction finished")
+            get_svm <- reactive({
+                withProgress(message = 'Running SVM...', value = 0, {
+                    d <- get_consensus()[[2]]
+                    labs <- rep(1, dim(dataset)[2])
+                    for(i in 2:input$clusters) {
+                        ind <- as.numeric(unlist(strsplit(as.character(d[i, ]), " ")))
+                        labs[ind] <- i
+                    }
+                    colnames(dataset) <- labs
+                    cat("svm prediction started")
+                    prediction <- support_vector_machines1(dataset, study.dataset, "linear")
+                    cat("svm prediction finished")
+                })
             })
             
             output$de_genes <- renderPlot({
-                get_de_genes()
+                withProgress(message = 'Calculating...', value = 0, {
+                    get_de_genes()
+                })
             }, height = plot.height, width = plot.width)
             
             output$mark_genes <- renderPlot({
-               get_mark_genes()
+                withProgress(message = 'Calculating...', value = 0, {
+                    get_mark_genes()
+                })
             }, height = plot.height, width = plot.width)
             
             output$labels <- renderUI({
@@ -341,29 +356,15 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
             })
             
             output$datalink <- downloadHandler(
-                filename <- function() {
-                    paste0("Exp", input$replicate, "-", input$norm, "-k=", input$clusters, "-labels.csv")
+                filename = function() {
+                    paste0("k=", input$clusters, "-labels.csv")
                 },
-                content <- function(file) {
-                    diss <- dist(data())
-                    clust <- hclust(diss)
-                    clusts <- cutree(clust, k = input$clusters)
-                    d <- rep(0, length(clusts))
-                    for(i in 2:input$clusters) {
-                        inds <- as.numeric(names(clusts[clusts == i]))
-                        d[inds] <- i
+                content = function(file) {
+                    if(dim(dataset)[2] > 20) {
+                        write.table(get_svm(), file = file)
+                    } else {
+                        write.table(get_consensus()[[2]][[1]], file = file)
                     }
-                    
-                    write.table(d, file = file)
-                }
-            )
-            output$svmlink <- downloadHandler(
-                filename <- function() {
-                    paste0("k=", input$clusters, "-svm-labels.csv")
-                },
-                content <- function(file) {
-                    d <- get_svm()
-                    write.table(d, file = file)
                 }
             )
         }
