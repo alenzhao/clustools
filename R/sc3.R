@@ -208,21 +208,6 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                 return(res[[1]])
             })
             
-            sort_cells_by_clusters <- isolate(function(labs.table) {
-                labs <- NULL
-                gaps_col <- NULL
-                gap <- 0
-                for(i in 1:input$clusters) {
-                    ind <- as.numeric(unlist(strsplit(as.character(labs.table[i, ]), " ")))
-                    gap <- gap + length(ind)
-                    labs <- c(labs, ind)
-                    if(i != input$clusters) {
-                        gaps_col <- c(gaps_col, gap)
-                    }
-                }
-                return(list(labs, gaps_col))
-            })
-            
             output$plot <- renderPlot({
                 d <- get_consensus()
                 hc <- d[[3]]
@@ -251,15 +236,14 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
             }, height = plot.height, width = plot.width)
             
             get_de_genes <- eventReactive(input$get_de_genes, {
-                if(is.null(rownames(dataset))) return(1)
-                clust <- get_consensus()[[3]]
-                clusts <- cutree(clust, input$clusters)
+                validate(
+                    need(try(!is.null(rownames(dataset))), "\nNo gene names provided in the input expression matrix!")
+                )
+                hc <- get_consensus()[[3]]
+                clusts <- cutree(hc, input$clusters)
                 res <- kruskal_statistics(dataset, clusts)
                 res <- head(res, 70)
-#                 d <- sort_cells_by_clusters(d)
-#                 labs <- d[[1]]
-#                 gaps_col <- d[[2]]
-                d <- dataset[rownames(dataset) %in% names(res), clust$order]
+                d <- dataset[rownames(dataset) %in% names(res), ]
                 d <- d[names(res), ]
                 
                 p.value.ann <- split(res, ceiling(seq_along(res)/17))
@@ -278,13 +262,12 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
             })
             
             get_mark_genes <- eventReactive(input$get_mark_genes, {
-                d <- get_consensus()[[2]]
-                labs <- rep(1, dim(dataset)[2])
-                for(i in 2:input$clusters) {
-                    ind <- as.numeric(unlist(strsplit(as.character(d[i, ]), " ")))
-                    labs[ind] <- i
-                }
-                res <- get_marker_genes(dataset, labs)
+                validate(
+                    need(try(!is.null(rownames(dataset))), "\nNo gene names provided in the input expression matrix!")
+                )
+                hc <- get_consensus()[[3]]
+                clusts <- cutree(hc, input$clusters)
+                res <- get_marker_genes(dataset, clusts)
                 res1 <- NULL
                 for(i in 1:input$clusters) {
                     tmp <- res[res[,2] == i, ]
@@ -294,16 +277,13 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                     res1 <- rbind(res1, tmp)
                 }
                 
-                d <- sort_cells_by_clusters(d)
-                labs <- d[[1]]
-                gaps_col <- d[[2]]
-                d <- dataset[rownames(dataset) %in% rownames(res1), labs]
+                d <- dataset[rownames(dataset) %in% rownames(res1), ]
                 d <- d[rownames(res1), ]
                 
                 pheatmap(d,
                          color = colour.pallete, show_colnames = F,
-                         cluster_cols = F, cluster_rows = F,
-                         gaps_col = gaps_col)
+                         cluster_cols = hc,
+                         cutree_cols = input$clusters, cluster_rows = F)
             })
             
             get_svm <- reactive({
