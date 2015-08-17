@@ -18,7 +18,9 @@ Depends:
     parallel,
     foreach,
     doParallel,
-    pheatmap,
+    grid,
+    gtable,
+    scales,
     RColorBrewer,
     ROCR
 LazyData: true

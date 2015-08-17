@@ -5,7 +5,12 @@ all_clusterings <- function(filename, ks) {
     } else {
         dataset <- read.table(filename, header = T)
         if(filename == "../clustering/tallulah/data/Bergiers_Exp1_FeatureCounts_BaseGenomeAnnotations_No_Multimapping.out" |
-           filename == "../clustering/tallulah/data/Bergiers_Exp2_FeatureCounts_BaseGenomeAnnotations_No_Multimapping.out") {
+           filename == "../clustering/tallulah/data/Bergiers_Exp2_FeatureCounts_BaseGenomeAnnotations_No_Multimapping.out" |
+           filename == "../clustering/tallulah/data/Bergiers_Exp1_FeatureCounts_BaseGenomeAnnotations_No_Multimapping_RUVnorm.txt" |
+           filename == "../clustering/tallulah/data/Bergiers_Exp2_FeatureCounts_BaseGenomeAnnotations_No_Multimapping_RUVnorm.txt" |
+           filename == "../clustering/tallulah/data/Bergiers_Exp1_FeatureCounts_BaseGenomeAnnotations_No_Multimapping_SFnorm.txt" |
+           filename == "../clustering/tallulah/data/Bergiers_Exp2_FeatureCounts_BaseGenomeAnnotations_No_Multimapping_SFnorm.txt") {
+            rownames(dataset) <- dataset[, 1]
             dataset <- dataset[ , 2:dim(dataset)[2]]
         }
     }
@@ -113,15 +118,14 @@ all_clusterings <- function(filename, ks) {
             clusts <- cutree(clust, k = as.numeric(all.combinations[i, 3]))
             
             labs <- NULL
-            for(j in 1:as.numeric(all.combinations[i, 3])) {
+            for(j in unique(clusts[clust$order])) {
                 labs <- rbind(labs, paste(names(clusts[clusts == j]), collapse = " "))
-            
             }
 
             labs <- as.data.frame(labs)
             colnames(labs) <- "Labels"
 
-            return(list(dat, labs))
+            return(list(dat, labs, clust))
         })
     }
     
@@ -220,7 +224,9 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
             })
             
             output$plot <- renderPlot({
-                d <- get_consensus()[[1]]
+                d <- get_consensus()
+                hc <- d[[3]]
+                d <- d[[1]]
                 show_labs <- TRUE
                 if(dim(d)[1] > 80) {
                     show_labs <- FALSE
@@ -228,36 +234,32 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                 withProgress(message = 'Plotting...', value = 0, {
                     pheatmap(d,
                              color = colour.pallete,
+                             cluster_rows = hc,
                              cutree_rows = input$clusters, cutree_cols = input$clusters,
                              show_rownames = show_labs, show_colnames = show_labs)
                 })
             }, height = plot.height, width = plot.width)
             
             output$matrix <- renderPlot({
-                d <- get_consensus()[[2]]
-                d <- sort_cells_by_clusters(d)
-                labs <- d[[1]]
-                gaps_col <- d[[2]]
+                hc <- get_consensus()[[3]]
                 withProgress(message = 'Plotting...', value = 0, {
-                    pheatmap(dataset[ , labs], cluster_cols = F, gaps_col = gaps_col,
+                    pheatmap(dataset, cluster_cols = hc,
+                             cutree_cols = input$clusters,
                              color = colour.pallete,
                              kmeans_k = 10, show_rownames = F, show_colnames = F)
                 })
             }, height = plot.height, width = plot.width)
             
             get_de_genes <- eventReactive(input$get_de_genes, {
-                d <- get_consensus()[[2]]
-                labs <- rep(1, dim(dataset)[2])
-                for(i in 2:input$clusters) {
-                    ind <- as.numeric(unlist(strsplit(as.character(d[i, ]), " ")))
-                    labs[ind] <- i
-                }
-                res <- kruskal_statistics(dataset, labs)
+                if(is.null(rownames(dataset))) return(1)
+                clust <- get_consensus()[[3]]
+                clusts <- cutree(clust, input$clusters)
+                res <- kruskal_statistics(dataset, clusts)
                 res <- head(res, 70)
-                d <- sort_cells_by_clusters(d)
-                labs <- d[[1]]
-                gaps_col <- d[[2]]
-                d <- dataset[rownames(dataset) %in% names(res), labs]
+#                 d <- sort_cells_by_clusters(d)
+#                 labs <- d[[1]]
+#                 gaps_col <- d[[2]]
+                d <- dataset[rownames(dataset) %in% names(res), clust$order]
                 d <- d[names(res), ]
                 
                 p.value.ann <- split(res, ceiling(seq_along(res)/17))
@@ -270,8 +272,9 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                 
                 pheatmap(d,
                          color = colour.pallete, show_colnames = F,
-                         cluster_cols = F, cluster_rows = F,
-                         gaps_col = gaps_col, annotation_row = p.value.ann)
+                         cluster_cols = hc,
+                         cutree_cols = input$clusters, cluster_rows = F,
+                         annotation_row = p.value.ann)
             })
             
             get_mark_genes <- eventReactive(input$get_mark_genes, {
