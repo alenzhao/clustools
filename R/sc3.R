@@ -231,7 +231,8 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                     pheatmap(dataset, cluster_cols = hc,
                              cutree_cols = input$clusters,
                              color = colour.pallete,
-                             kmeans_k = 10, show_rownames = F, show_colnames = F)
+                             kmeans_k = 100, show_rownames = F, show_colnames = F,
+                             treeheight_col = 0)
                 })
             }, height = plot.height, width = plot.width)
             
@@ -242,7 +243,7 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                 hc <- get_consensus()[[3]]
                 clusts <- cutree(hc, input$clusters)
                 res <- kruskal_statistics(dataset, clusts)
-                res <- head(res, 70)
+                res <- head(res, 68)
                 d <- dataset[rownames(dataset) %in% names(res), ]
                 d <- d[names(res), ]
                 
@@ -258,7 +259,8 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                          color = colour.pallete, show_colnames = F,
                          cluster_cols = hc,
                          cutree_cols = input$clusters, cluster_rows = F,
-                         annotation_row = p.value.ann)
+                         annotation_row = p.value.ann, annotation_names_row = F,
+                         treeheight_col = 0)
             })
             
             get_mark_genes <- eventReactive(input$get_mark_genes, {
@@ -269,7 +271,7 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                 clusts <- cutree(hc, input$clusters)
                 res <- get_marker_genes(dataset, clusts)
                 res1 <- NULL
-                for(i in 1:input$clusters) {
+                for(i in unique(res$Group)) {
                     tmp <- res[res[,2] == i, ]
                     if(dim(tmp)[1] > 10) {
                         tmp <- tmp[1:10, ]
@@ -277,13 +279,27 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                     res1 <- rbind(res1, tmp)
                 }
                 
-                d <- dataset[rownames(dataset) %in% rownames(res1), ]
-                d <- d[rownames(res1), ]
+                d <- dataset[rownames(res1), ]
+                # colnames(d) <- names(clusts)
+                
+                row.ann <- data.frame(Cluster = factor(res1$Group, levels = unique(res1$Group)))
+                rownames(row.ann) <- rownames(res1)
+                
+                # col.ann <- data.frame(Cluster1 = factor(clusts, levels = unique(clusts[hc$order])))
+                # rownames(col.ann) <- clusts
+                
+                # col.labs <- clusts
+                
+                row.gaps <- res1$Group
+                row.gaps <- which(diff(row.gaps) != 0)
                 
                 pheatmap(d,
                          color = colour.pallete, show_colnames = F,
                          cluster_cols = hc,
-                         cutree_cols = input$clusters, cluster_rows = F)
+                         cutree_cols = input$clusters, cluster_rows = F,
+                         annotation_row = row.ann,
+                         annotation_names_row = F,
+                         treeheight_col = 0, gaps_row = row.gaps)
             })
             
             get_svm <- reactive({
