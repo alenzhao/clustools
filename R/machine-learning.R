@@ -290,12 +290,12 @@ support_vector_machines1 <- function(teach, study, kern) {
     model <- tryCatch(svm(teach, labs, kernel = kern),
                       error = function(cond) return(NA))
     cat("Performing prediction...\n")
-    if(!is.na(model)) {
+    # if(!is.na(model)) {
         pred <- predict(model, t(study))
         return(pred = pred)
-    } else {
-        return(NA)
-    }
+    # } else {
+        # return(NA)
+    # }
 }
 
 #' Calclulate and plot confusions

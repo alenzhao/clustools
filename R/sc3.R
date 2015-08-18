@@ -15,7 +15,7 @@ all_clusterings <- function(filename, ks) {
         }
     }
     
-    svm.num.cells <- 100
+    svm.num.cells <- 50
     distances <- c("euclidean", "pearson", "spearman")
     dimensionality.reductions <- c("pca", "spectral")
     
@@ -55,7 +55,7 @@ all_clusterings <- function(filename, ks) {
                               n.dim = n.dim, stringsAsFactors = F)
     
     # register local cluster
-    cl <- makeCluster(detectCores() - 1)
+    cl <- makeCluster(detectCores() - 1) #, outfile="")
     registerDoParallel(cl, cores = detectCores() - 1)
     
     cat("3. Calculating distance matrices...\n")
@@ -286,7 +286,8 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                         col.gaps <- as.numeric(colnames(d))
                         col.gaps <- col.gaps[order(col.gaps)]
                         col.gaps <- which(diff(col.gaps) != 0)
-                        pheatmap(d[, order(colnames(d))], show_colnames = F,
+                        pheatmap(d[, order(colnames(d))], color = colour.pallete,
+                                 show_colnames = F,
                                  cluster_rows = F, cluster_cols = F, annotation_row = p.value.ann,
                                  annotation_names_row = F,
                                  treeheight_col = 0, gaps_col = col.gaps)
@@ -306,39 +307,62 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                 validate(
                     need(try(!is.null(rownames(dataset))), "\nNo gene names provided in the input expression matrix!")
                 )
-                hc <- get_consensus()[[3]]
-                clusts <- cutree(hc, input$clusters)
-                res <- get_marker_genes(dataset, clusts)
-                res1 <- NULL
-                for(i in unique(res$Group)) {
-                    tmp <- res[res[,2] == i, ]
-                    if(dim(tmp)[1] > 10) {
-                        tmp <- tmp[1:10, ]
+                withProgress(message = 'Calculating Marker genes...', value = 0, {
+                    hc <- get_consensus()[[3]]
+                    clusts <- cutree(hc, input$clusters)
+                    
+                    if(dim(study.dataset)[2] > 0) {
+                        d <- cbind(dataset, study.dataset)
+                        colnames(d) <- c(clusts, colnames(study.dataset))
+                    } else {
+                        d <- dataset
+                        colnames(d) <- clusts
                     }
-                    res1 <- rbind(res1, tmp)
-                }
-                
-                d <- dataset[rownames(res1), ]
-                # colnames(d) <- names(clusts)
-                
-                row.ann <- data.frame(Cluster = factor(res1$Group, levels = unique(res1$Group)))
-                rownames(row.ann) <- rownames(res1)
-                
-                # col.ann <- data.frame(Cluster1 = factor(clusts, levels = unique(clusts[hc$order])))
-                # rownames(col.ann) <- clusts
-                
-                # col.labs <- clusts
-                
-                row.gaps <- res1$Group
-                row.gaps <- which(diff(row.gaps) != 0)
-                
-                pheatmap(d,
-                         color = colour.pallete, show_colnames = F,
-                         cluster_cols = hc,
-                         cutree_cols = input$clusters, cluster_rows = F,
-                         annotation_row = row.ann,
-                         annotation_names_row = F,
-                         treeheight_col = 0, gaps_row = row.gaps)
+                    
+                    res <- get_marker_genes(d, as.numeric(colnames(d)))
+                    
+                    res1 <- NULL
+                    for(i in unique(res$Group)) {
+                        tmp <- res[res[,2] == i, ]
+                        if(dim(tmp)[1] > 10) {
+                            tmp <- tmp[1:10, ]
+                        }
+                        res1 <- rbind(res1, tmp)
+                    }
+                    
+                    d <- d[rownames(res1), ]
+                    # colnames(d) <- names(clusts)
+                    
+                    row.ann <- data.frame(Cluster = factor(res1$Group, levels = unique(res1$Group)))
+                    rownames(row.ann) <- rownames(res1)
+                    
+                    # col.ann <- data.frame(Cluster1 = factor(clusts, levels = unique(clusts[hc$order])))
+                    # rownames(col.ann) <- clusts
+                    
+                    # col.labs <- clusts
+                    
+                    row.gaps <- res1$Group
+                    row.gaps <- which(diff(row.gaps) != 0)
+                    
+                    if(dim(study.dataset)[2] > 0) {
+                        col.gaps <- as.numeric(colnames(d))
+                        col.gaps <- col.gaps[order(col.gaps)]
+                        col.gaps <- which(diff(col.gaps) != 0)
+                        pheatmap(d[, order(colnames(d))], color = colour.pallete,
+                                 show_colnames = F,
+                                 cluster_rows = F, cluster_cols = F, annotation_row = row.ann,
+                                 annotation_names_row = F,
+                                 treeheight_col = 0, gaps_row = row.gaps, gaps_col = col.gaps)
+                    } else {
+                        pheatmap(d,
+                                 color = colour.pallete, show_colnames = F,
+                                 cluster_cols = hc,
+                                 cutree_cols = input$clusters, cluster_rows = F,
+                                 annotation_row = row.ann,
+                                 annotation_names_row = F,
+                                 treeheight_col = 0, gaps_row = row.gaps)
+                    }
+                })
             })
             
             get_svm <- eventReactive(input$svm, {
@@ -361,9 +385,7 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
             }, height = plot.height, width = plot.width)
             
             output$mark_genes <- renderPlot({
-                withProgress(message = 'Calculating marker genes...', value = 0, {
-                    get_mark_genes()
-                })
+                get_mark_genes()
             }, height = plot.height, width = plot.width)
             
             output$labels <- renderUI({
