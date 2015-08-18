@@ -15,7 +15,7 @@ all_clusterings <- function(filename, ks) {
         }
     }
     
-    svm.num.cells <- 50
+    svm.num.cells <- 200
     distances <- c("euclidean", "pearson", "spearman")
     dimensionality.reductions <- c("pca", "spectral")
     
@@ -31,22 +31,22 @@ all_clusterings <- function(filename, ks) {
         dataset <- log2(1 + dataset)
     }
     
+    study.dataset <- data.frame()
+    if(dim(dataset)[2] > svm.num.cells) {
+        cat("\n")
+        cat(paste0("Your dataset contains more than ", svm.num.cells, " cells, therefore clustering wil be performed on a random sample of ", svm.num.cells, " cells, the rest of the cells will be predicted using SVM."))
+        cat("\n")
+        cat("\n")
+        working.sample <- sample(1:dim(dataset)[2], svm.num.cells)
+        study.dataset <- dataset[ , setdiff(1:dim(dataset)[2], working.sample)]
+        dataset <- dataset[, working.sample]
+    }
+    
     n.cells <- dim(dataset)[2]
     n.dim <- floor(0.05 * n.cells) : ceiling(0.08 * n.cells)
     
     if(length(n.dim) > 15) {
         n.dim <- sample(n.dim, 15)
-    }
-    
-    study.dataset <- data.frame()
-    if(n.cells > svm.num.cells) {
-        cat("\n")
-        cat(paste0("Your dataset contains more than ", svm.num.cells, " cells, therefore clustering wil be performed on a random sample of ", svm.num.cells, " cells, the rest of the cells will be predicted using SVM."))
-        cat("\n")
-        cat("\n")
-        working.sample <- sample(1:n.cells, svm.num.cells)
-        study.dataset <- dataset[ , setdiff(1:n.cells, working.sample)]
-        dataset <- dataset[, working.sample]
     }
     
     hash.table <- expand.grid(distan = distances,
@@ -55,7 +55,7 @@ all_clusterings <- function(filename, ks) {
                               n.dim = n.dim, stringsAsFactors = F)
     
     # register local cluster
-    cl <- makeCluster(detectCores() - 1) #, outfile="")
+    cl <- makeCluster(detectCores() - 1, outfile="")
     registerDoParallel(cl, cores = detectCores() - 1)
     
     cat("3. Calculating distance matrices...\n")
@@ -66,19 +66,25 @@ all_clusterings <- function(filename, ks) {
     }
     names(dists) <- distances
     
+    pb <- txtProgressBar(min = 1, max = dim(hash.table)[1], style = 3)
+    
     cat("4. Performing dimensionality reduction and kmeans clusterings...\n")
     labs = foreach(i = 1:dim(hash.table)[1],
                    .packages = "clustools",
                    .combine = rbind) %dopar% {
         try({
             t <- transformation(get(hash.table[i, 1], dists), hash.table[i, 2])[[1]]
-            paste(kmeans(t[, 1:hash.table[i, 4]],
+            s <- paste(kmeans(t[, 1:hash.table[i, 4]],
                          hash.table[i, 3],
                          iter.max = 1e+09,
                          nstart = 1000)$cluster,
                   collapse = " ")
+            setTxtProgressBar(pb, i)
+            return(s)
         })
     }
+    
+    close(pb)
     
     res <- cbind(hash.table, labs)
     res$labs <- as.character(res$labs)
