@@ -15,7 +15,7 @@ all_clusterings <- function(filename, ks) {
         }
     }
     
-    svm.num.cells <- 50
+    svm.num.cells <- 100
     distances <- c("euclidean", "pearson", "spearman")
     dimensionality.reductions <- c("pca", "spectral")
     
@@ -191,17 +191,27 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                 downloadLink('datalink', label = "Save cell labels")
             ),
             mainPanel(
-                tabsetPanel(
-                    tabPanel("Consensus Matrix (1)", plotOutput('plot')),
-                    tabPanel("Expression Matrix (1)", plotOutput('matrix')),
-                    tabPanel("Cell Labels (1)", div(htmlOutput('labels'), style = "font-size:80%")),
-                    tabPanel("SVM (1+)", textOutput('svm_panel')),
-                    tabPanel("DE genes (2)", plotOutput('de_genes')),
-                    tabPanel("Marker genes (2)", plotOutput('mark_genes'))
-                )
+                uiOutput('mytabs')  
             )
         ),
         server = function(input, output) {
+            output$mytabs = renderUI({
+                if(dim(study.dataset)[2] > 0) {
+                    myTabs <- list(tabPanel("Consensus Matrix (1)", plotOutput('plot')),
+                                   tabPanel("Expression Matrix (1)", plotOutput('matrix')),
+                                   tabPanel("Cell Labels (1)", div(htmlOutput('labels'), style = "font-size:80%")),
+                                   tabPanel("SVM (1+)", textOutput('svm_panel')),
+                                   tabPanel("DE genes (2)", plotOutput('de_genes')),
+                                   tabPanel("Marker genes (2)", plotOutput('mark_genes')))
+                } else {
+                    myTabs <- list(tabPanel("Consensus Matrix (1)", plotOutput('plot')),
+                                   tabPanel("Expression Matrix (1)", plotOutput('matrix')),
+                                   tabPanel("Cell Labels (1)", div(htmlOutput('labels'), style = "font-size:80%")),
+                                   tabPanel("DE genes (2)", plotOutput('de_genes')),
+                                   tabPanel("Marker genes (2)", plotOutput('mark_genes')))
+                }
+                do.call(tabsetPanel, myTabs)
+            })
             get_consensus <- reactive({
                 res <- cons.table[unlist(lapply(dist.opts, function(x){setequal(x, input$distance)})) &
                                       unlist(lapply(dim.red.opts, function(x){setequal(x, input$dimRed)})) &
@@ -248,32 +258,47 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                 validate(
                     need(try(!is.null(rownames(dataset))), "\nNo gene names provided in the input expression matrix!")
                 )
-                hc <- get_consensus()[[3]]
-                clusts <- cutree(hc, input$clusters)
-                d <- cbind(dataset, study.dataset)
-                res <- kruskal_statistics(d, c(clusts, colnames(study.dataset)))
-                res <- head(res, 68)
-                # d <- dataset[rownames(dataset) %in% names(res), ]
-                d <- d[names(res), ]
+                withProgress(message = 'Calculating DE genes...', value = 0, {
+                    hc <- get_consensus()[[3]]
+                    clusts <- cutree(hc, input$clusters)
+                    if(dim(study.dataset)[2] > 0) {
+                        d <- cbind(dataset, study.dataset)
+                        colnames(d) <- c(clusts, colnames(study.dataset))
+                    } else {
+                        d <- dataset
+                        colnames(d) <- clusts
+                    }
 
-                p.value.ann <- split(res, ceiling(seq_along(res)/17))
-                p.value.ranges <- as.vector(unlist(lapply(p.value.ann, function(x){rep(max(x), length(x))})))
-                p.value.ranges <- format(p.value.ranges, scientific = T, digits = 2)
-                p.value.ranges <- paste("<", p.value.ranges, sep=" ")
-                
-                p.value.ann <- data.frame(p.value = factor(p.value.ranges, levels = unique(p.value.ranges)))
-                rownames(p.value.ann) <- names(res)
-                
-                if(dim(dataset)[2] + dim(study.dataset)[2] > svm.num.cells) {
-                    pheatmap(d)
-                } else {
-                    pheatmap(d,
-                             color = colour.pallete, show_colnames = F,
-                             cluster_cols = hc,
-                             cutree_cols = input$clusters, cluster_rows = F,
-                             annotation_row = p.value.ann, annotation_names_row = F,
-                             treeheight_col = 0)
-                }
+                    res <- kruskal_statistics(d, colnames(d))
+                    
+                    res <- head(res, 68)
+                    d <- d[names(res), ]
+    
+                    p.value.ann <- split(res, ceiling(seq_along(res)/17))
+                    p.value.ranges <- as.vector(unlist(lapply(p.value.ann, function(x){rep(max(x), length(x))})))
+                    p.value.ranges <- format(p.value.ranges, scientific = T, digits = 2)
+                    p.value.ranges <- paste("<", p.value.ranges, sep=" ")
+                    
+                    p.value.ann <- data.frame(p.value = factor(p.value.ranges, levels = unique(p.value.ranges)))
+                    rownames(p.value.ann) <- names(res)
+                    
+                    if(dim(study.dataset)[2] > 0) {
+                        col.gaps <- as.numeric(colnames(d))
+                        col.gaps <- col.gaps[order(col.gaps)]
+                        col.gaps <- which(diff(col.gaps) != 0)
+                        pheatmap(d[, order(colnames(d))], show_colnames = F,
+                                 cluster_rows = F, cluster_cols = F, annotation_row = p.value.ann,
+                                 annotation_names_row = F,
+                                 treeheight_col = 0, gaps_col = col.gaps)
+                    } else {
+                        pheatmap(d,
+                                 color = colour.pallete, show_colnames = F,
+                                 cluster_cols = hc,
+                                 cutree_cols = input$clusters, cluster_rows = F,
+                                 annotation_row = p.value.ann, annotation_names_row = F,
+                                 treeheight_col = 0)
+                    }
+                })
                 
             })
             
@@ -332,9 +357,7 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
             })
             
             output$de_genes <- renderPlot({
-                withProgress(message = 'Calculating DE genes...', value = 0, {
-                    get_de_genes()
-                })
+                get_de_genes()
             }, height = plot.height, width = plot.width)
             
             output$mark_genes <- renderPlot({
