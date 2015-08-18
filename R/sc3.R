@@ -15,7 +15,7 @@ all_clusterings <- function(filename, ks) {
         }
     }
     
-    svm.num.cells <- 500
+    svm.num.cells <- 50
     distances <- c("euclidean", "pearson", "spearman")
     dimensionality.reductions <- c("pca", "spectral")
     
@@ -26,16 +26,9 @@ all_clusterings <- function(filename, ks) {
     min.reads <- filter1.params$min.reads
     dataset <- gene_filter1(dataset, min.cells, max.cells, min.reads)
     
-    if(dim(dataset)[2] > svm.num.cells) {
-        cat("\n")
-        cat("Your dataset contains more than 1000 cells, therefore clustering
-            wil be performed on a random sample of 1000 cells, the rest of the
-            cells will be predicted using SVM.")
-        cat("\n")
-        cat("\n")
-        working.sample <- sample(1:dim(dataset)[2], svm.num.cells)
-        study.dataset <- dataset[ , setdiff(1:dim(dataset)[2], working.sample)]
-        dataset <- dataset[, working.sample]
+    cat("2. Log2-transforming data...\n")
+    if(filename != "bernstein") {
+        dataset <- log2(1 + dataset)
     }
     
     n.cells <- dim(dataset)[2]
@@ -45,15 +38,21 @@ all_clusterings <- function(filename, ks) {
         n.dim <- sample(n.dim, 15)
     }
     
+    study.dataset <- data.frame()
+    if(n.cells > svm.num.cells) {
+        cat("\n")
+        cat(paste0("Your dataset contains more than ", svm.num.cells, " cells, therefore clustering wil be performed on a random sample of ", svm.num.cells, " cells, the rest of the cells will be predicted using SVM."))
+        cat("\n")
+        cat("\n")
+        working.sample <- sample(1:n.cells, svm.num.cells)
+        study.dataset <- dataset[ , setdiff(1:n.cells, working.sample)]
+        dataset <- dataset[, working.sample]
+    }
+    
     hash.table <- expand.grid(distan = distances,
                               dim.red = dimensionality.reductions,
                               k = c(min(ks) - 1, ks),
                               n.dim = n.dim, stringsAsFactors = F)
-    
-    cat("2. Log2-transforming data...\n")
-    if(filename != "bernstein") {
-        dataset <- log2(1 + dataset)
-    }
     
     # register local cluster
     cl <- makeCluster(detectCores() - 1)
@@ -136,10 +135,10 @@ all_clusterings <- function(filename, ks) {
     
     show_consensus(filename, distances, dimensionality.reductions,
                    cbind(all.combinations, cons),
-                   dataset, study.dataset)
+                   dataset, study.dataset, svm.num.cells)
 }
 
-show_consensus <- function(filename, distances, dimensionality.reductions, cons.table, dataset, study.dataset) {
+show_consensus <- function(filename, distances, dimensionality.reductions, cons.table, dataset, study.dataset, svm.num.cells) {
     
     dist.opts <- strsplit(unlist(cons.table[,1]), " ")
     dim.red.opts <- strsplit(unlist(cons.table[,2]), " ")
@@ -173,6 +172,14 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                 checkboxGroupInput("dimRed", label = "Dimensionality reduction",
                                    choices = dimensionality.reductions,
                                    selected = dimensionality.reductions[1]),
+                
+                if(dim(dataset)[2] + dim(study.dataset)[2] > svm.num.cells) {
+                h4("1+. SVM")},
+                if(dim(dataset)[2] + dim(study.dataset)[2] > svm.num.cells) {
+                p("Press this button when you have found the best clustering\n\n")},
+                if(dim(dataset)[2] + dim(study.dataset)[2] > svm.num.cells) {
+                actionButton("svm", label = "Run SVM")},
+
                 h4("2. Gene identificatiion"),
                 p("\n\n"),
                 actionButton("get_de_genes", label = "Get DE genes"),
@@ -185,11 +192,12 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
             ),
             mainPanel(
                 tabsetPanel(
-                    tabPanel("Consensus Matrix", plotOutput('plot')),
-                    tabPanel("Expression matrix", plotOutput('matrix')),
-                    tabPanel("Cell Labels", div(htmlOutput('labels'), style = "font-size:80%")),
-                    tabPanel("DE genes", plotOutput('de_genes')),
-                    tabPanel("Marker genes", plotOutput('mark_genes'))
+                    tabPanel("Consensus Matrix (1)", plotOutput('plot')),
+                    tabPanel("Expression Matrix (1)", plotOutput('matrix')),
+                    tabPanel("Cell Labels (1)", div(htmlOutput('labels'), style = "font-size:80%")),
+                    tabPanel("SVM (1+)", textOutput('svm_panel')),
+                    tabPanel("DE genes (2)", plotOutput('de_genes')),
+                    tabPanel("Marker genes (2)", plotOutput('mark_genes'))
                 )
             )
         ),
@@ -242,11 +250,12 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                 )
                 hc <- get_consensus()[[3]]
                 clusts <- cutree(hc, input$clusters)
-                res <- kruskal_statistics(dataset, clusts)
+                d <- cbind(dataset, study.dataset)
+                res <- kruskal_statistics(d, c(clusts, colnames(study.dataset)))
                 res <- head(res, 68)
-                d <- dataset[rownames(dataset) %in% names(res), ]
+                # d <- dataset[rownames(dataset) %in% names(res), ]
                 d <- d[names(res), ]
-                
+
                 p.value.ann <- split(res, ceiling(seq_along(res)/17))
                 p.value.ranges <- as.vector(unlist(lapply(p.value.ann, function(x){rep(max(x), length(x))})))
                 p.value.ranges <- format(p.value.ranges, scientific = T, digits = 2)
@@ -255,12 +264,17 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                 p.value.ann <- data.frame(p.value = factor(p.value.ranges, levels = unique(p.value.ranges)))
                 rownames(p.value.ann) <- names(res)
                 
-                pheatmap(d,
-                         color = colour.pallete, show_colnames = F,
-                         cluster_cols = hc,
-                         cutree_cols = input$clusters, cluster_rows = F,
-                         annotation_row = p.value.ann, annotation_names_row = F,
-                         treeheight_col = 0)
+                if(dim(dataset)[2] + dim(study.dataset)[2] > svm.num.cells) {
+                    pheatmap(d)
+                } else {
+                    pheatmap(d,
+                             color = colour.pallete, show_colnames = F,
+                             cluster_cols = hc,
+                             cutree_cols = input$clusters, cluster_rows = F,
+                             annotation_row = p.value.ann, annotation_names_row = F,
+                             treeheight_col = 0)
+                }
+                
             })
             
             get_mark_genes <- eventReactive(input$get_mark_genes, {
@@ -302,29 +316,29 @@ show_consensus <- function(filename, distances, dimensionality.reductions, cons.
                          treeheight_col = 0, gaps_row = row.gaps)
             })
             
-            get_svm <- reactive({
+            get_svm <- eventReactive(input$svm, {
                 withProgress(message = 'Running SVM...', value = 0, {
-                    d <- get_consensus()[[2]]
-                    labs <- rep(1, dim(dataset)[2])
-                    for(i in 2:input$clusters) {
-                        ind <- as.numeric(unlist(strsplit(as.character(d[i, ]), " ")))
-                        labs[ind] <- i
-                    }
-                    colnames(dataset) <- labs
-                    cat("svm prediction started")
+                    hc <- get_consensus()[[3]]
+                    clusts <- cutree(hc, input$clusters)
+                    colnames(dataset) <- clusts
                     prediction <- support_vector_machines1(dataset, study.dataset, "linear")
-                    cat("svm prediction finished")
+                    colnames(study.dataset) <<- prediction
+                    return(prediction)
                 })
             })
             
+            output$svm_panel <- renderText({
+                get_svm()
+            })
+            
             output$de_genes <- renderPlot({
-                withProgress(message = 'Calculating...', value = 0, {
+                withProgress(message = 'Calculating DE genes...', value = 0, {
                     get_de_genes()
                 })
             }, height = plot.height, width = plot.width)
             
             output$mark_genes <- renderPlot({
-                withProgress(message = 'Calculating...', value = 0, {
+                withProgress(message = 'Calculating marker genes...', value = 0, {
                     get_mark_genes()
                 })
             }, height = plot.height, width = plot.width)
