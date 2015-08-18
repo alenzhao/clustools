@@ -243,6 +243,7 @@ support_vector_machines <- function(dataset, teach.proportion, kern) {
     
     d <- get(dataset)
     dat <- gene_filter1(d, min.cells, max.cells, min.reads)
+    dat <- log2(1 + dat)
     samp <- sample(dim(dat)[2], round(teach.proportion*dim(dat)[2]))
     teach <- dat[ , samp]
     cat("Dimensions of teacher:\n")
