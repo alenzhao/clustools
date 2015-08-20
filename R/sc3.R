@@ -15,7 +15,16 @@ all_clusterings <- function(filename, ks) {
         }
     }
     
-    svm.num.cells <- 200
+    # hard cell filter
+    # more than 2000 genes have to be expressed in each cell
+    dataset <- dataset[ , colSums(dataset > 1e-2) > 2000]
+    
+    if(dim(dataset)[2] == 0) {
+        cat("Your dataset did not pass cell filter (more than 2000 genes have to be expressed in each cell)! Stopping now...")
+        return()
+    }
+    
+    svm.num.cells <- 1000
     distances <- c("euclidean", "pearson", "spearman")
     dimensionality.reductions <- c("pca", "spectral")
     
@@ -25,7 +34,12 @@ all_clusterings <- function(filename, ks) {
     max.cells <- filter1.params$max.cells
     min.reads <- filter1.params$min.reads
     dataset <- gene_filter1(dataset, min.cells, max.cells, min.reads)
-    
+
+    if(dim(dataset)[1] == 0) {
+        cat("Your dataset did not pass gene filter! Stopping now...")
+        return()
+    }
+        
     cat("2. Log2-transforming data...\n")
     if(filename != "bernstein") {
         dataset <- log2(1 + dataset)
