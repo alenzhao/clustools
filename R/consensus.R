@@ -145,9 +145,11 @@ consensus_prove_concept <- function(filename, k, cell.filter) {
     colnames(t2) <- c("ARI", "Method")
     res.all <- rbind(t1, t2)
     
+    write.table(res.all, paste0(filename, "-", filt, "-cons2.txt"))
+    
     p <- ggplot(res.all, aes(Method, as.numeric(ARI))) +
         geom_boxplot() +
         labs(x = "", y = "ARI") +
         theme_bw()
-    ggsave(paste0(filename, "-", filt, "-cons2.pdf"))
+    ggsave(paste0(filename, "-", filt, "-cons2.pdf"), w = 4, h = 3)
 }
