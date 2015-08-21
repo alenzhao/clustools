@@ -57,7 +57,7 @@ consensus_prove_concept <- function(filename, k, cell.filter, n.starts) {
     registerDoParallel(cl, cores = detectCores() - 1)
     
     cat("3. Calculating distance matrices...\n")
-    dists = foreach(i = distances, .packages = "SC3") %dopar% {
+    dists = foreach(i = distances, .packages = "clustools") %dopar% {
         try({
             calculate_distance(dataset, i)
         })
@@ -67,7 +67,7 @@ consensus_prove_concept <- function(filename, k, cell.filter, n.starts) {
     pb <- txtProgressBar(min = 1, max = dim(hash.table)[1], style = 3)
     
     cat("4. Performing dimensionality reduction and kmeans clusterings...\n")
-    labs = foreach(i = 1:dim(hash.table)[1], .packages = "SC3",
+    labs = foreach(i = 1:dim(hash.table)[1], .packages = "clustools",
                    .combine = rbind) %dopar% {
                        try({
                            t <- transformation(get(hash.table[i, 1], dists), hash.table[i, 2])[[1]]
@@ -108,7 +108,7 @@ consensus_prove_concept <- function(filename, k, cell.filter, n.starts) {
         }
     }
 
-    cons = foreach(i = 1:dim(all.combinations)[1], .packages = c("SC3", "mclust"), .combine = "rbind") %dopar% {
+    cons = foreach(i = 1:dim(all.combinations)[1], .packages = "clustools", .combine = "rbind") %dopar% {
         try({
             d <- res[res$distan %in% strsplit(all.combinations[i, 1], " ")[[1]] &
                          res$dim.red %in% strsplit(all.combinations[i, 2], " ")[[1]], ]
