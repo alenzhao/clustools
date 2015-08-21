@@ -1,4 +1,4 @@
-consensus_prove_concept <- function(filename, k, cell.filter) {
+consensus_prove_concept <- function(filename, k, cell.filter, n.starts) {
     dataset <- get(filename)
 
     # hard cell filter
@@ -6,7 +6,12 @@ consensus_prove_concept <- function(filename, k, cell.filter) {
     filt <- ""
     if(cell.filter) {
         filt <- "filt"
-        dataset <- dataset[ , colSums(dataset > 1e-2) > 2000]
+        
+        if(filename == "quake_all_fpkm") {
+            read.th <- 2000
+        }
+
+        dataset <- dataset[ , colSums(dataset > 1e-2) > read.th]
     
         if(dim(dataset)[2] == 0) {
             cat("Your dataset did not pass cell filter (more than 2000 genes have to be expressed in each cell)! Stopping now...")
@@ -69,7 +74,7 @@ consensus_prove_concept <- function(filename, k, cell.filter) {
                            s <- kmeans(t[, 1:hash.table[i, 3]],
                                              k,
                                              iter.max = 1e+09,
-                                             nstart = 1000)$cluster
+                                             nstart = n.starts)$cluster
                            setTxtProgressBar(pb, i)
                            return(s)
                        })
