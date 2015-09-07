@@ -137,6 +137,9 @@ consensus_prove_concept <- function(filename, k, cell.filter, n.starts) {
     colnames(t)[4:5] <- c("Individual", "Consensus")
     t <- as.data.table(t)
     t <- unique(melt(t[, c(1,2,4,5), with = FALSE]))
+    
+    write.table(t, paste0(filename, "-", filt, "-cons1.txt"))
+    
     p <- ggplot(t, aes(variable, value)) +
         geom_boxplot() +
         facet_grid(distan ~ dim.red) +
