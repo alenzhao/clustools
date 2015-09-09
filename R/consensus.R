@@ -122,8 +122,6 @@ consensus_prove_concept <- function(filename, k, cell.filter, n.starts) {
         })
     }
     
-    
-    
     # stop local cluster
     stopCluster(cl)
     res2 <- cbind(all.combinations, cons)
@@ -132,32 +130,21 @@ consensus_prove_concept <- function(filename, k, cell.filter, n.starts) {
     res2 <- as.data.frame(res2)
     res2[ , 3] <- as.numeric(as.character(res2[ , 3]))
     
-    # how consensus over n changes the ARI
-    t <- merge(res1, res2, by = c("distan", "dim.red"))
-    colnames(t)[4:5] <- c("Individual", "Consensus")
-    t <- as.data.table(t)
-    t <- unique(melt(t[, c(1,2,4,5), with = FALSE]))
-    
-    write.table(t, paste0(filename, "-", filt, "-cons1.txt"))
-    
-    p <- ggplot(t, aes(variable, value)) +
+    t <- merge(res1, res2, by = c("distan", "dim.red"), all = T)
+    d <- data.frame(
+        ARI = c(t[!is.na(t$n.dim), ]$ARI.x, 
+                unique(t[!is.na(t$n.dim), ]$ARI.y), 
+                t[is.na(t$n.dim), ]$ARI.y),
+        method = c(rep("Individual", length(t[!is.na(t$n.dim), ]$ARI.x)), 
+                   rep("Consensus1", length(unique(t[!is.na(t$n.dim), ]$ARI.y))), 
+                   rep("Consensus2", length(t[is.na(t$n.dim), ]$ARI.y))),
+        n.starts = n.starts)
+    write.table(d, paste0(filename, "-", filt, "-", n.starts, ".txt"))
+    d$method <- factor(d$method, levels <- c("Individual", "Consensus1", "Consensus2"))
+    p <- ggplot(d, aes(method, ARI)) +
         geom_boxplot() +
-        facet_grid(distan ~ dim.red) +
-        labs(x = "", y = "ARI") +
+        ylim(0,1) +
+        labs(x = "") +
         theme_bw()
-    ggsave(paste0(filename, "-", filt, "-cons1.pdf"))
-    
-    t1 <- data.frame(res1[,4], rep("Individual", length(res1[,4])), stringsAsFactors = F)
-    colnames(t1) <- c("ARI", "Method")
-    t2 <- data.frame(res2[,3], rep("Consensus", length(res2[,3])), stringsAsFactors = F)
-    colnames(t2) <- c("ARI", "Method")
-    res.all <- rbind(t1, t2)
-    
-    write.table(res.all, paste0(filename, "-", filt, "-cons2.txt"))
-    
-    p <- ggplot(res.all, aes(Method, as.numeric(ARI))) +
-        geom_boxplot() +
-        labs(x = "", y = "ARI") +
-        theme_bw()
-    ggsave(paste0(filename, "-", filt, "-cons2.pdf"), w = 4, h = 3)
+    ggsave(paste0(filename, "-", filt, "-", n.starts, ".pdf"))
 }
