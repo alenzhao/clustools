@@ -51,6 +51,7 @@ system("rm inst/extdata/GSE45719_RAW.tar")
 # Pollen
 #
 # I got this table directly from Alex Pollen (see Gmail communication)
+# it contains linear TPM values derived from HiSeq data for all genes and cells
 pollen <- read.table("inst/extdata/NBT_hiseq_linear_tpm_values.txt")
 labs <- colnames(pollen)
 labs[grepl("Hi_2338", labs)] <- 1
