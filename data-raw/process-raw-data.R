@@ -48,6 +48,27 @@ save(sandberg_all_read, file = "data/sandberg_all_read.rda")
 system("rm -r inst/extdata/sandberg")
 system("rm inst/extdata/GSE45719_RAW.tar")
 
+# Pollen
+#
+# I got this table directly from Alex Pollen (see Gmail communication)
+pollen <- read.table("inst/extdata/NBT_hiseq_linear_tpm_values.txt")
+labs <- colnames(pollen)
+labs[grepl("Hi_2338", labs)] <- 1
+labs[grepl("Hi_2339", labs)] <- 2
+labs[grepl("Hi_K562", labs)] <- 3
+labs[grepl("Hi_BJ", labs)] <- 4
+labs[grepl("Hi_HL60", labs)] <- 5
+labs[grepl("Hi_iPS", labs)] <- 6
+labs[grepl("Hi_Kera", labs)] <- 7
+labs[grepl("Hi_GW21.2", labs)] <- 8
+labs[grepl("Hi_GW21", labs)] <- 9
+labs[grepl("Hi_NPC", labs)] <- 10
+labs[grepl("Hi_GW16", labs)] <- 11
+labs <- as.numeric(labs)
+pollen <- as.matrix(pollen)
+colnames(pollen) <- labs
+save(pollen, file = "data/pollen.rda")
+
 # Linnarsson
 #
 # Zeisel, A. et al. Brain structure. Cell types in the mouse cortex and
