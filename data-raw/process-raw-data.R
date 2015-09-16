@@ -74,12 +74,29 @@ save(pollen, file = "data/pollen.rda")
 #
 d <- read.csv("inst/extdata/usoskin.csv", check.names = F)
 d <- as.matrix(d)
-# table(colnames(d[,grep("NF", colnames(d))]))
-# table(colnames(d[,grep("TH", colnames(d))]))
-# table(colnames(d[,grep("PEP", colnames(d))]))
-# table(colnames(d[,grep("NP", colnames(d))]))
+d <- d[,!grepl("Empty well", colnames(d))]
+d <- d[,!grepl("NF outlier", colnames(d))]
+d <- d[,!grepl("TH outlier", colnames(d))]
+d <- d[,!grepl("NoN outlier", colnames(d))]
+d <- d[,!grepl("NoN", colnames(d))]
+d <- d[,!grepl("Central, unsolved", colnames(d))]
+d <- d[,!grepl(">1 cell", colnames(d))]
+d <- d[,!grepl("Medium", colnames(d))]
+
+colnames(d)[colnames(d) == "NP1"] <- 1
+colnames(d)[colnames(d) == "NP2"] <- 2
+colnames(d)[colnames(d) == "NP3"] <- 3
+colnames(d)[colnames(d) == "PEP1"] <- 4
+colnames(d)[colnames(d) == "PEP2"] <- 5
+colnames(d)[colnames(d) == "NF1"] <- 6
+colnames(d)[colnames(d) == "NF2"] <- 7
+colnames(d)[colnames(d) == "NF3"] <- 8
+colnames(d)[colnames(d) == "NF4"] <- 9
+colnames(d)[colnames(d) == "NF5"] <- 10
+colnames(d)[colnames(d) == "TH"] <- 11
+
 usoskin <- d
-save(usoskin, file = "~/Google Drive/work/sanger/clustools/data/usoskin.rda")
+save(usoskin, file = "data/usoskin.rda")
 
 # Linnarsson
 #
