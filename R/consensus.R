@@ -1,4 +1,4 @@
-consensus_prove_concept <- function(filename, k, cell.filter, n.starts) {
+consensus_prove_concept <- function(filename, cell.filter, n.starts) {
     dataset <- get(filename)
 
     # hard cell filter
@@ -6,13 +6,7 @@ consensus_prove_concept <- function(filename, k, cell.filter, n.starts) {
     filt <- ""
     if(cell.filter) {
         filt <- "filt"
-        
-        if(filename == "quake_all_fpkm") {
-            read.th <- 2000
-        }
-
-        dataset <- dataset[ , colSums(dataset > 1e-2) > read.th]
-    
+        dataset <- dataset[ , colSums(dataset > 1e-2) > 2000]
         if(dim(dataset)[2] == 0) {
             cat("Your dataset did not pass cell filter (more than 2000 genes have to be expressed in each cell)! Stopping now...")
             return()
@@ -20,6 +14,7 @@ consensus_prove_concept <- function(filename, k, cell.filter, n.starts) {
     }
     
     labs.known <- colnames(dataset)
+    k <- length(unique(labs.known))
     
     distances <- c("euclidean", "pearson", "spearman")
     dimensionality.reductions <- c("pca", "spectral")
@@ -138,13 +133,13 @@ consensus_prove_concept <- function(filename, k, cell.filter, n.starts) {
         method = c(rep("Individual", length(t[!is.na(t$n.dim), ]$ARI.x)), 
                    rep("Consensus1", length(unique(t[!is.na(t$n.dim), ]$ARI.y))), 
                    rep("Consensus2", length(t[is.na(t$n.dim), ]$ARI.y))),
-        n.starts = n.starts)
-    write.table(d, paste0(filename, "-", filt, "-", n.starts, ".txt"))
+        n.starts = n.starts, dataset = filename)
+    write.table(d, paste0(filt, "-", n.starts, ".txt"))
     d$method <- factor(d$method, levels <- c("Individual", "Consensus1", "Consensus2"))
     p <- ggplot(d, aes(method, ARI)) +
         geom_boxplot() +
         ylim(0,1) +
         labs(x = "") +
         theme_bw()
-    ggsave(paste0(filename, "-", filt, "-", n.starts, ".pdf"))
+    ggsave(paste0(filt, "-", n.starts, ".pdf"))
 }
