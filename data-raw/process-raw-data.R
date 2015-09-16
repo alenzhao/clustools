@@ -70,6 +70,17 @@ pollen <- as.matrix(pollen)
 colnames(pollen) <- labs
 save(pollen, file = "data/pollen.rda")
 
+# Usoskin
+#
+d <- read.csv("inst/extdata/usoskin.csv", check.names = F)
+d <- as.matrix(d)
+# table(colnames(d[,grep("NF", colnames(d))]))
+# table(colnames(d[,grep("TH", colnames(d))]))
+# table(colnames(d[,grep("PEP", colnames(d))]))
+# table(colnames(d[,grep("NP", colnames(d))]))
+usoskin <- d
+save(usoskin, file = "~/Google Drive/work/sanger/clustools/data/usoskin.rda")
+
 # Linnarsson
 #
 # Zeisel, A. et al. Brain structure. Cell types in the mouse cortex and
