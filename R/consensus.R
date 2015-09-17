@@ -1,11 +1,11 @@
-consensus_prove_concept <- function(filename, cell.filter, n.starts) {
+consensus_prove_concept <- function(filename, cell.filter, gene.filter, n.starts) {
     dataset <- get(filename)
 
     # hard cell filter
     # more than 2000 genes have to be expressed in each cell
-    filt <- ""
+    filt <- "no_cell_filt"
     if(cell.filter) {
-        filt <- "filt"
+        filt <- "with_cell_filt"
         dataset <- dataset[ , colSums(dataset > 1e-2) > 2000]
         if(dim(dataset)[2] == 0) {
             cat("Your dataset did not pass cell filter (more than 2000 genes have to be expressed in each cell)! Stopping now...")
@@ -25,12 +25,16 @@ consensus_prove_concept <- function(filename, cell.filter, n.starts) {
     distances <- c("euclidean", "pearson", "spearman")
     dimensionality.reductions <- c("pca", "spectral")
     
-    cat("1. Preliminary gene filtering...\n")
-    filter1.params <- filter1_params(dataset)
-    min.cells <- filter1.params$min.cells
-    max.cells <- filter1.params$max.cells
-    min.reads <- filter1.params$min.reads
-    dataset <- gene_filter1(dataset, min.cells, max.cells, min.reads)
+    g.filt <- "no_gene_filt"
+    if(gene.filter) {
+        g.filt <- "with_gene_filt"
+        cat("1. Preliminary gene filtering...\n")
+        filter1.params <- filter1_params(dataset)
+        min.cells <- filter1.params$min.cells
+        max.cells <- filter1.params$max.cells
+        min.reads <- filter1.params$min.reads
+        dataset <- gene_filter1(dataset, min.cells, max.cells, min.reads)
+    }
     
     if(dim(dataset)[1] == 0) {
         cat("Your dataset did not pass gene filter! Stopping now...")
@@ -140,12 +144,12 @@ consensus_prove_concept <- function(filename, cell.filter, n.starts) {
                    rep("Consensus1", length(unique(t[!is.na(t$n.dim), ]$ARI.y))), 
                    rep("Consensus2", length(t[is.na(t$n.dim), ]$ARI.y))),
         n.starts = n.starts, dataset = filename)
-    write.table(d, paste0(filt, "-", n.starts, ".txt"))
+    write.table(d, paste0(filt, "_", g.filt, "_", n.starts, ".txt"))
     d$method <- factor(d$method, levels <- c("Individual", "Consensus1", "Consensus2"))
     p <- ggplot(d, aes(method, ARI)) +
         geom_boxplot() +
         ylim(0,1) +
         labs(x = "") +
         theme_bw()
-    ggsave(paste0(filt, "-", n.starts, ".pdf"))
+    ggsave(paste0(filt, "_", g.filt, "_", n.starts, ".pdf"))
 }
