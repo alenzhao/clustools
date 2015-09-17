@@ -35,14 +35,20 @@ save(quake_all_read, file = "data/quake_all_read.rda")
 # 193–196 (2014).
 # http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE45719
 system("sh data-raw/sandberg.sh")
-sandberg_all_rpkm <- read.table("inst/extdata/sandberg/all-rpkms.txt", header = F)
-sandberg_all_read <- read.table("inst/extdata/sandberg/all-reads.txt", header = F)
-sandberg_all_rpkm <- as.matrix(sandberg_all_rpkm)
-sandberg_all_read <- as.matrix(sandberg_all_read)
-colnames(sandberg_all_rpkm) <- sandberg_all_rpkm[1, ]
-colnames(sandberg_all_read) <- sandberg_all_read[1, ]
-sandberg_all_rpkm <- sandberg_all_rpkm[2:dim(sandberg_all_rpkm)[1], ]
-sandberg_all_read <- sandberg_all_read[2:dim(sandberg_all_read)[1], ]
+sandberg_all_rpkm <- read.table("inst/extdata/sandberg/sandberg-all-rpkms.txt", check.names = F, header = T)
+sandberg_all_read <- read.table("inst/extdata/sandberg/sandberg-all-reads.txt", check.names = F, header = T)
+
+genes <- sandberg_all_rpkm[ , 1]
+labs <- colnames(sandberg_all_rpkm)[2:dim(sandberg_all_rpkm)[2]]
+
+sandberg_all_rpkm <- as.matrix(sandberg_all_rpkm[ , 2:dim(sandberg_all_rpkm)[2]])
+colnames(sandberg_all_rpkm) <- labs
+rownames(sandberg_all_rpkm) <- genes
+
+sandberg_all_read <- as.matrix(sandberg_all_read[ , 2:dim(sandberg_all_read)[2]])
+colnames(sandberg_all_read) <- labs
+rownames(sandberg_all_read) <- genes
+
 save(sandberg_all_rpkm, file = "data/sandberg_all_rpkm.rda")
 save(sandberg_all_read, file = "data/sandberg_all_read.rda")
 system("rm -r inst/extdata/sandberg")

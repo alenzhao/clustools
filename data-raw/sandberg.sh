@@ -40,8 +40,11 @@ sed -i '' '1s/reads/9/g' $DATA/sandberg/91_reads-midblast.txt
 paste $DATA/sandberg/GSM111*_lateblast_* | awk '{for (i = 4; i <= NF; i += 6) printf ("%s%c", $i, i + 6 <= NF ? "\t" : "\n");}' > $DATA/sandberg/92_reads-lateblast.txt
 sed -i '' '1s/reads/10/g' $DATA/sandberg/92_reads-lateblast.txt
 
+awk -F"\t" '{if ($1) print $1}' $DATA/sandberg/GSM1112767_zy2_expression.txt > $DATA/sandberg/gene_names.txt
+
 paste $DATA/sandberg/*_reads-* > $DATA/sandberg/all-reads.txt
-rm $DATA/sandberg/*_reads-*
+paste $DATA/sandberg/gene_names.txt $DATA/sandberg/all-reads.txt > $DATA/sandberg/sandberg-all-reads.txt
+sed -i '' '1s/^#//' $DATA/sandberg/sandberg-all-reads.txt
 
 # RPKMs
 paste $DATA/sandberg/GSM111*_zy* | awk '{for (i = 3; i <= NF; i += 6) printf ("%s%c", $i, i + 6 <= NF ? "\t" : "\n");}' > $DATA/sandberg/1_reads-zy.txt
@@ -66,4 +69,5 @@ paste $DATA/sandberg/GSM111*_lateblast_* | awk '{for (i = 3; i <= NF; i += 6) pr
 sed -i '' '1s/RPKM/10/g' $DATA/sandberg/92_reads-lateblast.txt
 
 paste $DATA/sandberg/*_reads-* > $DATA/sandberg/all-rpkms.txt
-rm $DATA/sandberg/*_reads-*
+paste $DATA/sandberg/gene_names.txt $DATA/sandberg/all-rpkms.txt > $DATA/sandberg/sandberg-all-rpkms.txt
+sed -i '' '1s/^#//' $DATA/sandberg/sandberg-all-rpkms.txt
