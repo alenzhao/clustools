@@ -141,7 +141,7 @@ create_distance_matrix <- function(dataset, sel, distan) {
 #' 
 #' @examples
 #' machine_learning_pipeline("quake", "none", "spearman", "spectral", 4)
-machine_learning_pipeline <- function(dataset, sel, distan, clust, n.dim, cell.filter, gene.filter) {
+machine_learning_pipeline <- function(dataset, distan, clust, n.dim, cell.filter, gene.filter) {
     labs.known <- as.numeric(colnames(dataset))
     n.clusters <- length(unique(labs.known))
     
