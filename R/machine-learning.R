@@ -141,19 +141,48 @@ create_distance_matrix <- function(dataset, sel, distan) {
 #' 
 #' @examples
 #' machine_learning_pipeline("quake", "none", "spearman", "spectral", 4)
-machine_learning_pipeline <- function(dataset, sel, distan, clust, n.dim) {
-    labs.known <- as.numeric(colnames(get(dataset)))
+machine_learning_pipeline <- function(dataset, sel, distan, clust, n.dim, cell.filter, gene.filter) {
+    labs.known <- as.numeric(colnames(dataset))
     n.clusters <- length(unique(labs.known))
-    dists <- create_distance_matrix(dataset, sel, distan)
+    
+    # more than 2000 genes have to be expressed in each cell
+    if(cell.filter) {
+        cat("Preliminary cell filtering...\n")
+        dataset <- dataset[ , colSums(dataset > 1e-2) > 2000]
+        if(dim(dataset)[2] == 0) {
+            cat("Your dataset did not pass cell filter (more than 2000 genes have to be expressed in each cell)! Stopping now...")
+            return()
+        }
+    }
+
+    if(gene.filter) {
+        filter1.params <- filter1_params(dataset)
+        min.cells <- filter1.params$min.cells
+        max.cells <- filter1.params$max.cells
+        min.reads <- filter1.params$min.reads
+        d <- gene_filter1(dataset, min.cells, max.cells, min.reads)
+    }
+    
+    cat("Log-trasforming data...\n")
+    if (deparse(substitute(dataset)) != "bernstein") {
+        d <- log2(1 + d)
+    }
+    
+    # cat("Performing filtering2...\n")
+    # d <- gene_filter2(d, sel)
+    cat("Computing distance matrix...\n")
+    dists <- calculate_distance(d, distan)
+    
+    
     cat("Performing data transformation...\n")
     w <- transformation(dists, clust)
     cat("Performing kmeans clustering...\n")
     res <- check_kmeans_clustering(w[[1]], n.dim, n.clusters, labs.known)
-    sink(paste0(clust, "-inds.txt"))
+    sink(paste0(clust, "-", cell.filt, "-", gene.fit, "-inds.txt"))
     cat(c(unlist(res)[1:6], dataset, sel, distan, clust, n.dim))
     cat("\n")
     sink()
-    sink(paste0(clust, "-labs.txt"))
+    sink(paste0(clust, "-", cell.filt, "-", gene.fit, "-labs.txt"))
     cat(res$labs)
     cat("\n")
     cat(res$labs.known)
