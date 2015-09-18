@@ -179,7 +179,7 @@ machine_learning_pipeline <- function(dataset, distan, clust, n.dim, cell.filter
     cat("Performing kmeans clustering...\n")
     res <- check_kmeans_clustering(w[[1]], n.dim, n.clusters, labs.known)
     sink(paste0(clust, "-", cell.filt, "-", gene.filt, "-inds.txt"))
-    cat(c(unlist(res)[1:6], dataset, sel, distan, clust, n.dim))
+    cat(c(unlist(res)[1:6], dataset, distan, clust, n.dim, cell.filt, gene.filt))
     cat("\n")
     sink()
     sink(paste0(clust, "-", cell.filt, "-", gene.filt, "-labs.txt"))
