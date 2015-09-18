@@ -142,9 +142,6 @@ create_distance_matrix <- function(dataset, sel, distan) {
 #' @examples
 #' machine_learning_pipeline("quake", "none", "spearman", "spectral", 4)
 machine_learning_pipeline <- function(dataset, distan, clust, n.dim, cell.filter, gene.filter) {
-    labs.known <- as.numeric(colnames(dataset))
-    n.clusters <- length(unique(labs.known))
-    
     # more than 2000 genes have to be expressed in each cell
     if(cell.filter) {
         cat("Preliminary cell filtering...\n")
@@ -162,6 +159,9 @@ machine_learning_pipeline <- function(dataset, distan, clust, n.dim, cell.filter
         min.reads <- filter1.params$min.reads
         dataset <- gene_filter1(dataset, min.cells, max.cells, min.reads)
     }
+    
+    labs.known <- as.numeric(colnames(dataset))
+    n.clusters <- length(unique(labs.known))
     
     cat("Log-trasforming data...\n")
     if (deparse(substitute(dataset)) != "bernstein") {
