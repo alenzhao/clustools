@@ -160,18 +160,18 @@ machine_learning_pipeline <- function(dataset, distan, clust, n.dim, cell.filter
         min.cells <- filter1.params$min.cells
         max.cells <- filter1.params$max.cells
         min.reads <- filter1.params$min.reads
-        d <- gene_filter1(dataset, min.cells, max.cells, min.reads)
+        dataset <- gene_filter1(dataset, min.cells, max.cells, min.reads)
     }
     
     cat("Log-trasforming data...\n")
     if (deparse(substitute(dataset)) != "bernstein") {
-        d <- log2(1 + d)
+        dataset <- log2(1 + dataset)
     }
     
     # cat("Performing filtering2...\n")
     # d <- gene_filter2(d, sel)
     cat("Computing distance matrix...\n")
-    dists <- calculate_distance(d, distan)
+    dists <- calculate_distance(dataset, distan)
     
     
     cat("Performing data transformation...\n")
