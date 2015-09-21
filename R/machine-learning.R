@@ -177,17 +177,22 @@ machine_learning_pipeline <- function(dataset, name, distan, clust, n.dim, cell.
     cat("Performing data transformation...\n")
     w <- transformation(dists, clust)
     cat("Performing kmeans clustering...\n")
-    res <- check_kmeans_clustering(w[[1]], n.dim, n.clusters, labs.known)
+    
     sink(paste0(clust, "-", cell.filt, "-", gene.filt, "-inds.txt"))
-    cat(c(unlist(res)[1:6], name, distan, clust, n.dim, cell.filt, gene.filt))
-    cat("\n")
+    
+    for(i in 1:100) {
+        res <- check_kmeans_clustering(w[[1]], n.dim, n.clusters, labs.known)
+        cat(c(unlist(res)[1:6], name, distan, clust, n.dim, cell.filt, gene.filt))
+        cat("\n")
+    }
+    
     sink()
-    sink(paste0(clust, "-", cell.filt, "-", gene.filt, "-labs.txt"))
-    cat(res$labs)
-    cat("\n")
-    cat(res$labs.known)
-    cat("\n")
-    sink()
+#     sink(paste0(clust, "-", cell.filt, "-", gene.filt, "-labs.txt"))
+#     cat(res$labs)
+#     cat("\n")
+#     cat(res$labs.known)
+#     cat("\n")
+#     sink()
 }
 
 #' Nearest neighbour pipeline
