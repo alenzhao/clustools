@@ -172,3 +172,40 @@ rownames(kim_fpkm) <- genes
 save(kim_fpkm, file = "data/kim_fpkm.rda")
 system("rm -r inst/extdata/kim")
 system("rm inst/extdata/GSE55291_RAW.tar")
+
+
+# Ting
+#
+# Ting, D. T. et al. Single-cell RNA sequencing identifies extracellular matrix
+# gene expression by pancreatic circulating tumor cells. Cell Rep. 8, 1905–1918 (2014).
+# http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE51372
+system("sh data-raw/ting.sh")
+ting <- read.table("inst/extdata/GSE51372_readCounts.txt", check.names = F, header = T, sep = "\t", quote = "")
+genes <- ting[ , 4]
+labs <- colnames(ting)[7:dim(ting)[2]]
+
+ting <- as.matrix(ting[ , 7:dim(ting)[2]])
+colnames(ting) <- labs
+rownames(ting) <- genes
+
+# this was done manually!
+ting <- ting[ , !grepl("TuGMP3", colnames(ting)) & !grepl("GMP1", colnames(ting)) & !grepl("GMP2", colnames(ting))]
+clust1 <- c("MP4-28", "MP4-29", "MP4-31", "MP4-32", "MP6-10", "MP6-9", "MP6-17", "MP6-20", "MP6-2", "MP6-7", "MP6-3", "MP6-4", "MP6-5", "MP4-20", "MP4-22", "MP4-7", "MP4-8", "MP4-1", "MP4-6", "MP4-3", "MP4-4", "MP4-13", "MP4-14", "MP4-17")
+clust2 <- c("WBC-12", "WBC-11", "WBC-9", "WBC-10", "WBC-8", "WBC-6", "WBC-7", "WBC-5", "WBC-3", "WBC-4", "WBC-1", "WBC-2")
+clust3 <- c("MP2-1", "MP2-2", "MP4-24", "MP6-18", "MP6-6", "MP6-11", "MP6-15", "MP6-16", "MP7-21", "MP7-1", "MP7-3", "MP7-8", "MP7-9", "MP7-4", "MP7-7", "MP7-18", "MP7-20", "MP7-16", "MP7-12", "MP7-13", "MP7-31", "MP7-42", "MP7-30", "MP7-25", "MP7-29", "MP7-33", "MP7-34", "MP7-41", "MP7-37", "MP7-40", "MP2-36", "MP2-30", "MP2-32", "MP2-24", "MP2-26", "MP2-11", "MP2-4", "MP2-17", "MP2-18", "MP2-20", "MP2-21")
+clust7 <- c("MP6-21", "MP3-2", "nb508-1", "MP6-19", "MP3-3", "MP3-5", "MP3-17", "MP3-21", "MP3-8", "MP3-15", "MP3-9")
+
+labels <- colnames(ting)
+
+labels[labels %in% clust1] <- 1
+labels[labels %in% clust2] <- 2
+labels[labels %in% clust3] <- 3
+labels[labels %in% clust7] <- 7
+labels[grepl("TuMP", labels)] <- 4
+labels[grepl("nb508", labels)] <- 6
+labels[grepl("MEF", labels)] <- 5
+
+colnames(ting) <- labels
+
+save(ting, file = "data/ting.rda")
+system("rm inst/extdata/GSE51372_readCounts.txt")
