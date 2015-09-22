@@ -47,7 +47,7 @@ consensus_prove_concept <- function(filename, cell.filter, gene.filter, n.starts
     }
 
     n.cells <- dim(dataset)[2]
-    n.dim <- floor(0.05 * n.cells) : ceiling(0.08 * n.cells)
+    n.dim <- floor(0.04 * n.cells) : ceiling(0.07 * n.cells)
     
     if(length(n.dim) > 15) {
         n.dim <- sample(n.dim, 15)
