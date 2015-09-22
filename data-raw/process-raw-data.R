@@ -171,4 +171,4 @@ rownames(kim_fpkm) <- genes
 
 save(kim_fpkm, file = "data/kim_fpkm.rda")
 system("rm -r inst/extdata/kim")
-system("rm inst/extdata/GSE45719_RAW.tar")
+system("rm inst/extdata/GSE55291_RAW.tar")
