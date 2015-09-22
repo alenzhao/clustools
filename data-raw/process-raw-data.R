@@ -152,3 +152,23 @@ colnames(kirschner) <- c(rep(1, d0 - 1), rep(2, d2 - 1), rep(3, d4 - 1), rep(4, 
 save(kirschner, file = "data/kirschner.rda")
 system("rm -r inst/extdata/kirschner")
 system("rm inst/extdata/GSE65525.tar")
+
+
+# Kim
+#
+# Kim, D. H. et al. Single-cell transcriptome analysis reveals dynamic changes
+# in lncRNA expression during reprogramming. Cell Stem Cell 16, 88–101 (2015).
+# http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE55291
+system("sh data-raw/kim.sh")
+kim_fpkm <- read.table("inst/extdata/kim/kim-all-fpkm.txt", check.names = F, header = T)
+
+genes <- kim_fpkm[ , 1]
+labs <- colnames(kim_fpkm)[2:dim(kim_fpkm)[2]]
+
+kim_fpkm <- as.matrix(kim_fpkm[ , 2:dim(kim_fpkm)[2]])
+colnames(kim_fpkm) <- labs
+rownames(kim_fpkm) <- genes
+
+save(kim_fpkm, file = "data/kim_fpkm.rda")
+system("rm -r inst/extdata/kim")
+system("rm inst/extdata/GSE45719_RAW.tar")
