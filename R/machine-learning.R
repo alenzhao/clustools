@@ -141,7 +141,7 @@ create_distance_matrix <- function(dataset, sel, distan) {
 #' 
 #' @examples
 #' machine_learning_pipeline("quake", "none", "spearman", "spectral", 4)
-machine_learning_pipeline <- function(dataset, name, distan, clust, n.dim, cell.filter, gene.filter) {
+machine_learning_pipeline <- function(dataset, name, distan, clust, n.dim, cell.filter, gene.filter, realisations) {
     # more than 2000 genes have to be expressed in each cell
     if(cell.filter) {
         cat("Preliminary cell filtering...\n")
@@ -180,7 +180,7 @@ machine_learning_pipeline <- function(dataset, name, distan, clust, n.dim, cell.
     
     sink(paste0(clust, "-", cell.filt, "-", gene.filt, "-inds.txt"))
     
-    for(i in 1:100) {
+    for(i in 1:realisations) {
         res <- check_kmeans_clustering(w[[1]], n.dim, n.clusters, labs.known)
         cat(c(unlist(res)[1:6], name, distan, clust, n.dim, cell.filt, gene.filt))
         cat("\n")
