@@ -111,6 +111,29 @@ d7 <- d7[ , 2:dim(d7)[2]]
 rownames(d7) <- labs.all
 d7 <- as.matrix(d7)
 
+cols1 <- colnames(d1)
+cols1 <- paste("r1", cols1, sep = "_")
+cols2 <- colnames(d2)
+cols2 <- paste("r2", cols2, sep = "_")
+cols3 <- colnames(d3)
+cols3 <- paste("r3", cols3, sep = "_")
+cols4 <- colnames(d4)
+cols4 <- paste("r4", cols4, sep = "_")
+cols5 <- colnames(d5)
+cols5 <- paste("r5", cols5, sep = "_")
+cols6 <- colnames(d6)
+cols6 <- paste("r6", cols6, sep = "_")
+cols7 <- colnames(d7)
+cols7 <- paste("p1", cols7, sep = "_")
+
+colnames(d1) <- cols1
+colnames(d2) <- cols2
+colnames(d3) <- cols3
+colnames(d4) <- cols4
+colnames(d5) <- cols5
+colnames(d6) <- cols6
+colnames(d7) <- cols7
+
 # merge data files
 t <- cbind(d1, d2)
 t <- cbind(t, d3)
@@ -119,6 +142,21 @@ t <- cbind(t, d5)
 t <- cbind(t, d6)
 t <- cbind(t, d7)
 
-# save one big table
 maccarroll <- t
+
+# cell labels data file is downloaded from:
+# http://mccarrolllab.com/dropseq/
+cells <- read.table("inst/extdata/dropseq/retina_clusteridentities.txt", stringsAsFactors = F)
+
+cols <- colnames(maccarroll)
+cols <- cols[cols %in% cells[,1]]
+
+maccarroll <- maccarroll[ , colnames(maccarroll) %in% cols]
+
+cells <- cells[order(cells[,1]),]
+cols <- colnames(maccarroll)
+maccarroll <- maccarroll[ , order(cols)]
+colnames(maccarroll) <- cells[ , 2]
+
+# save one big table
 save(maccarroll, file = "data/maccarroll.rda")
