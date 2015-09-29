@@ -124,7 +124,30 @@ system("rm inst/extdata/linnarsson.txt")
 # Patel, A. P. et al. Single-cell RNA-seq highlights intratumoral heterogeneity
 # in primary glioblastoma. Science 344, 1396–1401 (2014).
 # http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE57872
+system("sh data-raw/bernstein.sh")
+bernstein <- read.table("inst/extdata/bernstein.txt")
 
+bernstein <- bernstein[,grepl("MGH26_", colnames(bernstein)) |
+                           grepl("MGH264_", colnames(bernstein)) |
+                           grepl("MGH28_", colnames(bernstein)) |
+                           grepl("MGH29_", colnames(bernstein)) |
+                           grepl("MGH30_", colnames(bernstein)) |
+                           grepl("MGH31_", colnames(bernstein))]
+# number of cells from 5 patients:
+# MGH26 118
+# MGH28 94
+# MGH29 75
+# MGH30 73
+# MGH31 70
+colnames(bernstein)[grepl("MGH26_", colnames(bernstein))] <- 1
+colnames(bernstein)[grepl("MGH264_", colnames(bernstein))] <- 1
+colnames(bernstein)[grepl("MGH28_", colnames(bernstein))] <- 2
+colnames(bernstein)[grepl("MGH29_", colnames(bernstein))] <- 3
+colnames(bernstein)[grepl("MGH30_", colnames(bernstein))] <- 4
+colnames(bernstein)[grepl("MGH31_", colnames(bernstein))] <- 5
+bernstein <- as.matrix(bernstein)
+save(bernstein, file = "data/bernstein.rda")
+system("rm inst/extdata/bernstein.txt")
 
 # Zhong
 # Biase, F. H., Cao, X. & Zhong, S. Cell fate inclination within 2-cell and
