@@ -23,5 +23,10 @@ Depends:
     gtable,
     scales,
     RColorBrewer,
-    ROCR
+    ROCR,
+    robustbase,
+    stats,
+    MASS,
+    rrcov,
+    rrcovHD
 LazyData: true
