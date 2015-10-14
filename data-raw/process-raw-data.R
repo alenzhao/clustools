@@ -74,35 +74,76 @@ labs[grepl("Hi_GW16", labs)] <- 11
 labs <- as.numeric(labs)
 pollen <- as.matrix(pollen)
 colnames(pollen) <- labs
-save(pollen, file = "data/pollen.rda")
+
+pollen1 <- read.table("inst/extdata/NBT_hiseq_linear_tpm_values.txt")
+labs <- colnames(pollen1)
+labs[grepl("Hi_K562", labs) | grepl("Hi_HL60", labs)] <- 1
+labs[grepl("Hi_2338", labs) | grepl("Hi_2339", labs)] <- 2
+labs[grepl("Hi_BJ", labs) | grepl("Hi_Kera", labs)] <- 3
+labs[grepl("Hi_iPS", labs) | grepl("Hi_GW21.2", labs) |
+         grepl("Hi_GW21", labs) | grepl("Hi_NPC", labs) |
+         grepl("Hi_GW16", labs)] <- 4
+labs <- as.numeric(labs)
+pollen1 <- as.matrix(pollen1)
+colnames(pollen1) <- labs
+save(pollen1, pollen, file = "data/pollen.rda")
 
 # Usoskin
 #
-d <- read.csv("inst/extdata/usoskin.csv", check.names = F)
-d <- as.matrix(d)
-d <- d[,!grepl("Empty well", colnames(d))]
-d <- d[,!grepl("NF outlier", colnames(d))]
-d <- d[,!grepl("TH outlier", colnames(d))]
-d <- d[,!grepl("NoN outlier", colnames(d))]
-d <- d[,!grepl("NoN", colnames(d))]
-d <- d[,!grepl("Central, unsolved", colnames(d))]
-d <- d[,!grepl(">1 cell", colnames(d))]
-d <- d[,!grepl("Medium", colnames(d))]
+d <- read.csv("inst/extdata/usoskin.csv", header = F)
+genes <- d[ , 1]
+d <- as.matrix(d[ , 2:dim(d)[2]])
+rownames(d) <- genes
 
-colnames(d)[colnames(d) == "NP1"] <- 1
-colnames(d)[colnames(d) == "NP2"] <- 2
-colnames(d)[colnames(d) == "NP3"] <- 3
-colnames(d)[colnames(d) == "PEP1"] <- 4
-colnames(d)[colnames(d) == "PEP2"] <- 5
-colnames(d)[colnames(d) == "NF1"] <- 6
-colnames(d)[colnames(d) == "NF2"] <- 7
-colnames(d)[colnames(d) == "NF3"] <- 8
-colnames(d)[colnames(d) == "NF4"] <- 9
-colnames(d)[colnames(d) == "NF5"] <- 10
-colnames(d)[colnames(d) == "TH"] <- 11
+labs <- read.csv("inst/extdata/usoskin-labels.csv", header = F)
+filt <- !grepl("Empty well", as.character(unlist(labs[1,]))) &
+        !grepl("NF outlier", as.character(unlist(labs[1,]))) &
+        !grepl("TH outlier", as.character(unlist(labs[1,]))) &
+        !grepl("NoN outlier", as.character(unlist(labs[1,]))) &
+        !grepl("NoN", as.character(unlist(labs[1,]))) &
+        !grepl("Central, unsolved", as.character(unlist(labs[1,]))) &
+        !grepl(">1 cell", as.character(unlist(labs[1,]))) &
+        !grepl("Medium", as.character(unlist(labs[1,])))
+
+d <- d[ , filt]
+labs <- labs[, filt]
+
+usoskin1 <- d
+colnames(usoskin1) <- as.character(unlist(labs[1,]))
+
+colnames(usoskin1)[colnames(usoskin1) == "NP"] <- 1
+colnames(usoskin1)[colnames(usoskin1) == "TH"] <- 2
+colnames(usoskin1)[colnames(usoskin1) == "NF"] <- 3
+colnames(usoskin1)[colnames(usoskin1) == "PEP"] <- 4
+
+usoskin2 <- d
+colnames(usoskin2) <- as.character(unlist(labs[2,]))
+
+colnames(usoskin2)[colnames(usoskin2) == "NP1"] <- 1
+colnames(usoskin2)[colnames(usoskin2) == "TH"] <- 2
+colnames(usoskin2)[colnames(usoskin2) == "NF4/5"] <- 3
+colnames(usoskin2)[colnames(usoskin2) == "NF2/3"] <- 4
+colnames(usoskin2)[colnames(usoskin2) == "NP2"] <- 5
+colnames(usoskin2)[colnames(usoskin2) == "PEP2"] <- 6
+colnames(usoskin2)[colnames(usoskin2) == "PEP1"] <- 7
+colnames(usoskin2)[colnames(usoskin2) == "NF1"] <- 8
 
 usoskin <- d
-save(usoskin, file = "data/usoskin.rda")
+colnames(usoskin) <- as.character(unlist(labs[3,]))
+
+colnames(usoskin)[colnames(usoskin) == "NP1"] <- 1
+colnames(usoskin)[colnames(usoskin) == "NP2"] <- 2
+colnames(usoskin)[colnames(usoskin) == "NP3"] <- 3
+colnames(usoskin)[colnames(usoskin) == "PEP1"] <- 4
+colnames(usoskin)[colnames(usoskin) == "PEP2"] <- 5
+colnames(usoskin)[colnames(usoskin) == "NF1"] <- 6
+colnames(usoskin)[colnames(usoskin) == "NF2"] <- 7
+colnames(usoskin)[colnames(usoskin) == "NF3"] <- 8
+colnames(usoskin)[colnames(usoskin) == "NF4"] <- 9
+colnames(usoskin)[colnames(usoskin) == "NF5"] <- 10
+colnames(usoskin)[colnames(usoskin) == "TH"] <- 11
+
+save(usoskin1, usoskin2, usoskin, file = "data/usoskin.rda")
 
 # Linnarsson
 #
