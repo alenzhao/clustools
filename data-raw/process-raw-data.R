@@ -88,6 +88,46 @@ pollen1 <- as.matrix(pollen1)
 colnames(pollen1) <- labs
 save(pollen1, pollen, file = "data/pollen.rda")
 
+# Pollen data from pcaReduce paper (their own mapping using TopHat)
+pollen.pcaReduce <- read.csv("inst/extdata/Pollen2014-pcaReduce.txt")
+
+labs <- colnames(pollen.pcaReduce)
+labs <- unlist(lapply(strsplit(labs, "_"), "[[", 2))
+
+pollen.pcaReduce <- as.matrix(pollen.pcaReduce)
+colnames(pollen.pcaReduce) <- labs
+
+colnames(pollen.pcaReduce)[colnames(pollen.pcaReduce) == "2338"] <- 1
+colnames(pollen.pcaReduce)[colnames(pollen.pcaReduce) == "2339"] <- 2
+colnames(pollen.pcaReduce)[colnames(pollen.pcaReduce) == "K562"] <- 3
+colnames(pollen.pcaReduce)[colnames(pollen.pcaReduce) == "BJ"] <- 4
+colnames(pollen.pcaReduce)[colnames(pollen.pcaReduce) == "HL60"] <- 5
+colnames(pollen.pcaReduce)[colnames(pollen.pcaReduce) == "iPS"] <- 6
+colnames(pollen.pcaReduce)[colnames(pollen.pcaReduce) == "Kera"] <- 7
+colnames(pollen.pcaReduce)[colnames(pollen.pcaReduce) == "GW21.3"] <- 8
+colnames(pollen.pcaReduce)[colnames(pollen.pcaReduce) == "GW21"] <- 9
+colnames(pollen.pcaReduce)[colnames(pollen.pcaReduce) == "NPC"] <- 10
+colnames(pollen.pcaReduce)[colnames(pollen.pcaReduce) == "GW16"] <- 11
+
+pollen.pcaReduce1 <- read.csv("inst/extdata/Pollen2014-pcaReduce.txt")
+
+labs <- colnames(pollen.pcaReduce1)
+labs <- unlist(lapply(strsplit(labs, "_"), "[[", 2))
+
+pollen.pcaReduce1 <- as.matrix(pollen.pcaReduce1)
+colnames(pollen.pcaReduce1) <- labs
+
+colnames(pollen.pcaReduce1)[colnames(pollen.pcaReduce1) == "K562" | colnames(pollen.pcaReduce1) == "HL60"] <- 1
+colnames(pollen.pcaReduce1)[colnames(pollen.pcaReduce1) == "2338" | colnames(pollen.pcaReduce1) == "2339"] <- 2
+colnames(pollen.pcaReduce1)[colnames(pollen.pcaReduce1) == "BJ" | colnames(pollen.pcaReduce1) == "Kera"] <- 3
+colnames(pollen.pcaReduce1)[colnames(pollen.pcaReduce1) == "iPS" |
+                               colnames(pollen.pcaReduce1) == "GW16" |
+                               colnames(pollen.pcaReduce1) == "GW21" |
+                               colnames(pollen.pcaReduce1) == "GW21.3" |
+                               colnames(pollen.pcaReduce1) == "NPC"] <- 4
+
+save(pollen.pcaReduce1, pollen.pcaReduce, file = "data/pollen.pcaReduce.rda")
+
 # Usoskin
 #
 d <- read.csv("inst/extdata/usoskin.csv", header = F)
