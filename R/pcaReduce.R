@@ -1,4 +1,4 @@
-pca_reduce <- function(dataset) {
+pca_reduce <- function(dataset, nbt, q = 30) {
     if(deparse(substitute(dataset)) != "bernstein") {
         Input <- t(log2(dataset + 1)) # data matrix, cells in rows, genes in columns
     } else {
@@ -6,7 +6,7 @@ pca_reduce <- function(dataset) {
         Input <- t(dataset) # data matrix, cells in rows, genes in columns
     }
     true_labs <- rownames(Input)
-    Output_S <- PCAreduce(Input, nbt=100, q=30, method='S')
+    Output_S <- PCAreduce(Input, nbt=nbt, q=q, method='S')
     N <- length(Output_S)
     M <- dim(Output_S[[1]])[2]
     K <- c()
