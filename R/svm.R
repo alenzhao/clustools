@@ -1,5 +1,5 @@
 svm_real <- function(dataset, j, kern) {
-    if(deparse(substitute(dataset)) != "bernstein") {
+    if(!grepl("bernstein", deparse(substitute(dataset)))) {
         filter1.params <- filter1_params(dataset)
         min.cells <- filter1.params$min.cells
         max.cells <- filter1.params$max.cells
