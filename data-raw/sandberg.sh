@@ -7,16 +7,16 @@ tar xvC $DATA/sandberg -f $DATA/GSE45719_RAW.tar
 gunzip $DATA/sandberg/*
 
 # cells:
-#     1-4 - zygote
-#     5-12 - early2cell
-#     13-24 - mid2cell
-#     25-34 - late2cell
-#     35-48 - 4cell
-#     49-85 - 8cell
-#     86-135 - 16cell
-#     136-178 - earlyblast
-#     179-238 - midblast
-#     239-268 - lateblast
+#  1   1-4 - zygote
+#  2   5-12 - early2cell
+#  3   13-24 - mid2cell
+#  4   25-34 - late2cell
+#  5   35-48 - 4cell
+#  6   49-85 - 8cell
+#  7   86-135 - 16cell
+#  8   136-178 - earlyblast
+#  9   179-238 - midblast
+#  10   239-268 - lateblast
 
 # Raw READS
 paste $DATA/sandberg/GSM111*_zy* | awk '{for (i = 4; i <= NF; i += 6) printf ("%s%c", $i, i + 6 <= NF ? "\t" : "\n");}' > $DATA/sandberg/1_reads-zy.txt
