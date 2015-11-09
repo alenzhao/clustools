@@ -61,5 +61,14 @@ find_outliers <- function(dataset, clusts, cell.filt = F) {
             outl.res[[i]] <- out
         }
     }
-    return(outl.res)
+
+    nams <- NULL
+    vals <- NULL
+    for(i in 1:length(outl.res)) {
+        vals <- c(vals, outl.res[[i]])
+        nams <- c(nams, names(outl.res[[i]]))
+    }
+    names(vals) <- nams
+    
+    return(vals)
 }
