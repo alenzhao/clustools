@@ -28,5 +28,6 @@ Depends:
     stats,
     MASS,
     rrcov,
-    rrcovHD
+    rrcovHD,
+    Rtsne
 LazyData: true
