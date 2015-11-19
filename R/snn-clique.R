@@ -47,27 +47,29 @@ SNN<-function(data, outfile, k, distance){
     write.table(edges, outfile, quote=FALSE, sep='\t',col.names=FALSE,row.names=FALSE)
 }
 
-run_snn_cliq <- function(path.to.Cliq.py, dataset, name, log.tr, par.k, par.r, par.m) {
-#     filter1.params <- filter1_params(dataset)
-#     min.cells <- filter1.params$min.cells
-#     max.cells <- filter1.params$max.cells
-#     min.reads <- filter1.params$min.reads
-#     d <- gene_filter1(dataset, min.cells, max.cells, min.reads)
-#     
-#     if (log.tr) {
-#         d <- log2(1 + d)
-#     }
+run_snn_cliq <- function(path.to.Cliq.py, dat, distan, par.k, par.r, par.m) {
+    dataset <- get(dat)
+    if(dat != "bernstein") {
+        filter1.params <- filter1_params(dataset)
+        min.cells <- filter1.params$min.cells
+        max.cells <- filter1.params$max.cells
+        min.reads <- filter1.params$min.reads
+        d <- gene_filter1(dataset, min.cells, max.cells, min.reads)
+        d <- log2(1 + d)
+    } else {
+        d <- dataset
+    }
     
     d <- t(d)
     
-    SNN(d, paste0("snn-clique-", name, ".txt"), k=par.k, distance='euclidean')
+    SNN(d, paste0("snn-clique-", dat, ".txt"), k=par.k, distance=distan)
     system(paste0("python ", path.to.Cliq.py,"Cliq.py -i ", "snn-clique-",
-                  name, ".txt", "  -o ", "res-snn-clique-", name, ".txt -r ",
+                  dat, ".txt", "  -o ", "res-snn-clique-", dat, ".txt -r ",
                   par.r, " -m ", par.m))
-    clusts <- read.table(paste0("res-snn-clique-", name, ".txt"))
+    clusts <- read.table(paste0("res-snn-clique-", dat, ".txt"))
     
-    system(paste0("rm snn-clique-", name, ".txt"))
-    system(paste0("rm res-snn-clique-", name, ".txt"))
+    system(paste0("rm snn-clique-", dat, ".txt"))
+    system(paste0("rm res-snn-clique-", dat, ".txt"))
     
     return(list(c(t(clusts)), adjustedRandIndex(rownames(d), c(t(clusts)))))
 }
