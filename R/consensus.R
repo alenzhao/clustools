@@ -12,13 +12,7 @@ consensus_prove_concept <- function(filename, cell.filter, gene.filter, n.starts
             return()
         }
     }
-    
-    svm.num.cells <- 1000
-    if(dim(dataset)[2] > svm.num.cells) {
-        working.sample <- sample(1:dim(dataset)[2], svm.num.cells)
-        dataset <- dataset[, working.sample]
-    }
-    
+
     labs.known <- colnames(dataset)
     k <- length(unique(labs.known))
     
