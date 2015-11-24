@@ -29,5 +29,7 @@ Depends:
     MASS,
     rrcov,
     rrcovHD,
-    Rtsne
+    Rtsne,
+    pcaMethods,
+    pcaReduce,
 LazyData: true
