@@ -11,15 +11,13 @@ run_tsne <- function(dat) {
         d <- dataset
     }
     k <- length(unique(colnames(d)))
-    ari <- NULL
-    for(i in 1:100) {
-        if(dat == "quake_all_fpkm") {
-            tsne_out <- Rtsne(t(d), perplexity = 0.5) # Run TSNE
-        } else {
-            tsne_out <- Rtsne(t(d)) # Run TSNE
-        }
-        t <- kmeans(tsne_out$Y, k, iter.max = 1e9, nstart = 1000)$clust
-        ari <- c(ari, adjustedRandIndex(t, colnames(d)))
+
+    if(dat == "quake_all_fpkm") {
+        tsne_out <- Rtsne(t(d), perplexity = 0.5) # Run TSNE
+    } else {
+        tsne_out <- Rtsne(t(d)) # Run TSNE
     }
-    return(data.frame(ARI = ari, Method = "tSNE+kmeans", Hierarchy = dat, Distance = "-"))
+    t <- kmeans(tsne_out$Y, k, iter.max = 1e9, nstart = 1000)$clust
+    
+    return(adjustedRandIndex(t, colnames(d)))
 }
