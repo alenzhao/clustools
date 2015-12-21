@@ -52,8 +52,8 @@ consensus_prove_concept <- function(filename, cell.filter, gene.filter, n.starts
                               n.dim = n.dim, stringsAsFactors = F)
     
     # register local cluster
-    cl <- makeCluster(detectCores() - 1, outfile="")
-    registerDoParallel(cl, cores = detectCores() - 1)
+    cl <- makeCluster(8, outfile="")
+    registerDoParallel(cl, cores = 8)
     
     cat("3. Calculating distance matrices...\n")
     dists = foreach(i = distances, .packages = "clustools") %dopar% {

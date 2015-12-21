@@ -35,8 +35,8 @@ svm_real <- function(dataset, j, kern) {
                               n.dim = n.dim, stringsAsFactors = F)
     
     # register local cluster
-    cl <- makeCluster(detectCores() - 1, outfile="")
-    registerDoParallel(cl, cores = detectCores() - 1)
+    cl <- makeCluster(8, outfile="")
+    registerDoParallel(cl, cores = 8)
     
     dists = foreach(i = distances, .packages = "clustools") %dopar% {
         try({
@@ -111,8 +111,8 @@ svm_real_bernstein <- function(dataset, j, kern) {
                               n.dim = n.dim, stringsAsFactors = F)
     
     # register local cluster
-    cl <- makeCluster(detectCores() - 1, outfile="")
-    registerDoParallel(cl, cores = detectCores() - 1)
+    cl <- makeCluster(8, outfile="")
+    registerDoParallel(cl, cores = 8)
     
     dists = foreach(i = distances, .packages = "clustools") %dopar% {
         try({
